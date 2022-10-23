@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32901.215
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Erupt", "Erupt.vcxproj", "{5C3435EF-3C19-4B0F-872A-3E405E34DF1D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Windows = Debug|Windows
+		Release|Windows = Release|Windows
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5C3435EF-3C19-4B0F-872A-3E405E34DF1D}.Debug|Windows.ActiveCfg = Debug|x64
+		{5C3435EF-3C19-4B0F-872A-3E405E34DF1D}.Debug|Windows.Build.0 = Debug|x64
+		{5C3435EF-3C19-4B0F-872A-3E405E34DF1D}.Release|Windows.ActiveCfg = Release|x64
+		{5C3435EF-3C19-4B0F-872A-3E405E34DF1D}.Release|Windows.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9ACEFC02-EEE3-4C1D-AFDE-91770048377D}
+	EndGlobalSection
+EndGlobal
