@@ -13,6 +13,9 @@ namespace Erupt
 		Window(int width, int height, const std::string& name);
 		~Window();
 
+		Window(const Window&) = delete;
+		Window& operator=(const Window&) = delete;
+
 		bool ShouldClose();
 
 	private:
