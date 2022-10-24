@@ -10,8 +10,6 @@ namespace Erupt
 	class Application
 	{
 	public:
-		Application();
-		~Application();
 
 		static void Run();
 	public:
