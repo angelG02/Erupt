@@ -13,12 +13,12 @@ namespace Erupt
 		Application();
 		~Application();
 
-		void Run();
+		static void Run();
 	public:
 
 
 	private:
-		Window m_EruptWindow{ WINDOW_WIDTH, WINDOW_HEIGHT, "Henlo Vulkan!" };
+		static Window m_EruptWindow;
 	};
 
 } // namespace Erupt

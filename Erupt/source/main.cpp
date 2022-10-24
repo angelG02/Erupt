@@ -6,11 +6,10 @@
 #include <stdexcept>
 
 int main() {
-    Erupt::Application app{};
 
 	try
 	{
-		app.Run();
+		Erupt::Application::Run();
 	}
 	catch (const std::exception& e)
 	{
