@@ -2,6 +2,8 @@
 
 #include "graphics/EruptWindow.h"
 
+#include "Log.h"
+
 namespace Erupt
 {
 	static constexpr int WINDOW_WIDTH = 800;
@@ -10,6 +12,7 @@ namespace Erupt
 	class Application
 	{
 	public:
+		static void Init();
 
 		static void Run();
 	public:
