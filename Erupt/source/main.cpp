@@ -9,6 +9,7 @@ int main() {
 
 	try
 	{
+		Erupt::Application::Init();
 		Erupt::Application::Run();
 	}
 	catch (const std::exception& e)

@@ -133,11 +133,13 @@
   <ItemGroup>
     <ClCompile Include="source\Application.cpp" />
     <ClCompile Include="source\graphics\EruptWindow.cpp" />
+    <ClCompile Include="source\Log.cpp" />
     <ClCompile Include="source\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\Application.h" />
     <ClInclude Include="headers\graphics\EruptWindow.h" />
+    <ClInclude Include="headers\Log.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
