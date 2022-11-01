@@ -5,6 +5,7 @@
   <PropertyGroup>
     <OutDir>$(SolutionDir)build\$(Platform)\$(Configuration)_$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)build\$(Platform)\$(Configuration)_$(ProjectName)\</IntDir>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>

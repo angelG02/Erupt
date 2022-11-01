@@ -1,12 +1,7 @@
 #include "Application.h"
 
-// std
-#include <cstdlib>
-#include <iostream>
-#include <stdexcept>
-
-int main() {
-
+int main()
+{
 	try
 	{
 		Erupt::Application::Init();
@@ -14,9 +9,9 @@ int main() {
 	}
 	catch (const std::exception& e)
 	{
-		std::cerr << e.what();
+		ERUPT_ERROR("{0}", e.what());
 		return EXIT_FAILURE;
 	}
 
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }
