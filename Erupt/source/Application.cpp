@@ -7,9 +7,7 @@ namespace Erupt
 	void Application::Init()
 	{
 		Log::Init();
-		ERUPT_CORE_TRACE("Initialized Erupt Engine!");
-		ERUPT_INFO("Application number: {0}", 1);
-
+		ERUPT_CORE_INFO("Initialized Erupt Engine!");
 	}
 
 	void Application::Run()
