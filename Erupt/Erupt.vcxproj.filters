@@ -35,5 +35,19 @@
     <ClInclude Include="headers\Log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="headers\graphics\EruptPipeline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="compile_shaders.bat">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="resources\shaders\simple_shader.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="resources\shaders\simple_shader.vert">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

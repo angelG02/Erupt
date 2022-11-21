@@ -137,8 +137,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\Application.h" />
+    <ClInclude Include="headers\graphics\EruptPipeline.h" />
     <ClInclude Include="headers\graphics\EruptWindow.h" />
     <ClInclude Include="headers\Log.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="compile_shaders.bat" />
+    <None Include="resources\shaders\simple_shader.frag" />
+    <None Include="resources\shaders\simple_shader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
