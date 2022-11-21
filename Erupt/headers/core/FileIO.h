@@ -19,11 +19,11 @@ namespace Erupt
 		static std::string GetResourcesPath();
 
 		/// <summary>
-		/// Read from text file
+		/// Read from file
 		/// </summary>
 		/// <param name="std::string filePath:">Realtive to the project root folder file path to the file you would like to read from</param>
-		/// <returns>std::string containing the contets read if operation is successful. If not returns an empty string</returns>
-		static std::string ReadTextFile(const std::string& filePath);
+		/// <returns>vector<char> containing the contets read if operation is successful. If not throws an exception</returns>
+		static std::vector<char> ReadFile(const std::string& filePath);
 
 		/// <summary>
 		/// Write to text file

@@ -1,5 +1,7 @@
 #include "core/FileIO.h"
 
+#include "core/Log.h"
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -20,22 +22,25 @@ namespace Erupt
 		return m_ResourcesPath;
 	}
 
-	std::string	FileIO::ReadTextFile(const std::string& filePath)
+	std::vector<char> FileIO::ReadFile(const std::string& filePath)
 	{
 		const std::string path = GetResourcesPath() + filePath;
 
-		std::ifstream file(path, std::ios::binary | std::ios::ate);
+		std::ifstream file(path, std::ios::ate | std::ios::binary);
+
 		if (!file.is_open())
 		{
-			printf("ERROR: file %s with path %s not found!", filePath.c_str(), path.c_str());
-			return std::string();
+			ERUPT_CORE_ERROR("BOOM!");
+			throw std::runtime_error("Failed to open file: " + path);
 		}
 
-		file.seekg(0, std::ios::end);
-		const size_t size = file.tellg();
-		std::string buffer(size, '\0');
+		size_t fileSize = static_cast<size_t>(file.tellg());
+		std::vector<char> buffer(fileSize);
+
 		file.seekg(0);
-		file.read(&buffer[0], size);
+		file.read(buffer.data(), fileSize);
+
+		file.close();
 
 		return buffer;
 	}
