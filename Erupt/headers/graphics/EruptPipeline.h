@@ -12,10 +12,13 @@ namespace Erupt
 
 		~EruptPipeline() = default;
 
-	private:
-		static std::vector<char> ReadFile(const std::string& filepath);
+		void Init();
 
+	private:
 		void CreateGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilepath);
+
+	private:
+		std::string m_VertFilepath, m_FragFilepath;
 	};
 
 }

@@ -14,7 +14,7 @@ namespace Erupt
 	{
 		std::string currentDir = _SOLUTIONDIR;
 
-		m_ResourcesPath = currentDir + "\\resources\\";
+		m_ResourcesPath = currentDir + "resources\\";
 	}
 
 	std::string FileIO::GetResourcesPath()

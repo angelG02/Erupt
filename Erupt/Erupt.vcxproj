@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClCompile Include="source\core\Application.cpp" />
     <ClCompile Include="source\core\FileIO.cpp" />
+    <ClCompile Include="source\graphics\EruptPipeline.cpp" />
     <ClCompile Include="source\graphics\EruptWindow.cpp" />
     <ClCompile Include="source\core\Log.cpp" />
   </ItemGroup>

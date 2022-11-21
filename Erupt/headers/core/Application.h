@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/EruptWindow.h"
+#include "graphics/EruptPipeline.h"
 
 #include "Log.h"
 
@@ -19,7 +20,8 @@ namespace Erupt
 
 
 	private:
-		static Window m_EruptWindow;
+		static Window s_EruptWindow;
+		static EruptPipeline s_EruptPipeline;
 	};
 
 } // namespace Erupt
