@@ -1,4 +1,6 @@
-#include "Application.h"
+#include "core/Application.h"
+
+#include "core/FileIO.h"
 
 namespace Erupt
 {
@@ -7,6 +9,7 @@ namespace Erupt
 	void Application::Init()
 	{
 		Log::Init();
+		FileIO::Init();
 		ERUPT_CORE_INFO("Initialized Erupt Engine!");
 	}
 
