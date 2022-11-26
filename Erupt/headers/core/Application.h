@@ -13,15 +13,17 @@ namespace Erupt
 	class Application
 	{
 	public:
-		static void Init();
+		void Init();
 
-		static void Run();
+		void Run();
 	public:
 
 
 	private:
-		static Window s_EruptWindow;
-		static EruptPipeline s_EruptPipeline;
+		Window m_EruptWindow { WINDOW_WIDTH, WINDOW_HEIGHT, "Henlo Vulkan!" };
+		EruptPipeline m_EruptPipeline { "shaders/compiled/simple_shader.vert.spv", "shaders/compiled/simple_shader.frag.spv" };
 	};
+
+	extern Application& Engine;
 
 } // namespace Erupt

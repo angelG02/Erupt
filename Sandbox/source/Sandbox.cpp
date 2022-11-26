@@ -2,11 +2,11 @@
 
 int main()
 {
-	Erupt::Application::Init();
+	Erupt::Engine.Init();
 
 	try
 	{
-		Erupt::Application::Run();
+		Erupt::Engine.Run();
 	}
 	catch (const std::exception& e)
 	{
