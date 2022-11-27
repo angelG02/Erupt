@@ -204,7 +204,7 @@ namespace Erupt {
 		}
 
 		vkGetDeviceQueue(m_Device, indices.graphicsFamily, 0, &m_GraphicsQueue);
-		vkGetDeviceQueue(m_Device, indices.presentFamily, 0, &m_GraphicsQueue);
+		vkGetDeviceQueue(m_Device, indices.presentFamily, 0, &m_PresentQueue);
 	}
 
 	void EruptDevice::CreateCommandPool()
@@ -607,5 +607,4 @@ namespace Erupt {
 			throw std::runtime_error("failed to bind image memory!");
 		}
 	}
-
-}  // namespace lve
+}

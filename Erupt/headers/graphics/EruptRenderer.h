@@ -27,6 +27,7 @@ namespace Erupt
 		void DrawFrame();
 
 		Window& GetWindow() { return m_EruptWindow; }
+		EruptDevice& GetDevice() { return m_EruptDevice; }
 
 	private:
 		void CreatePipelineLayout();

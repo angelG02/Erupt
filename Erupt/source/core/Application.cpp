@@ -21,6 +21,9 @@ namespace Erupt
 		while (!m_EruptRenderer.GetWindow().ShouldClose())
 		{
 			glfwPollEvents();
+			m_EruptRenderer.DrawFrame();
 		}
+
+		vkDeviceWaitIdle(m_EruptRenderer.GetDevice().Device());
 	}
 }

@@ -3,6 +3,7 @@
 #include "core/FileIO.h"
 
 #include <stdexcept>
+#include <array>
 
 namespace Erupt
 {
@@ -23,7 +24,21 @@ namespace Erupt
 
 	void EruptRenderer::DrawFrame()
 	{
+		uint32_t imageIndex;
+		auto result = m_EruptSwapChain.AcquireNextImage(&imageIndex);
 
+		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+		{
+			ERUPT_CORE_ERROR("Failed to acquire swap chain image!");
+			throw std::runtime_error("Failed to acquire swap chain image!");
+		}
+
+		result = m_EruptSwapChain.SubmitCommandBuffers(&m_CommandBuffers[imageIndex], &imageIndex);
+		if (result != VK_SUCCESS)
+		{
+			ERUPT_CORE_ERROR("Failed to present swap chain image!");
+			throw std::runtime_error("Failed to present swap chain image!");
+		}
 	}
 
 	void EruptRenderer::CreatePipelineLayout()
@@ -60,6 +75,56 @@ namespace Erupt
 
 	void EruptRenderer::CreateCommandBuffers()
 	{
+		m_CommandBuffers.resize(m_EruptSwapChain.ImageCount());
 
+		VkCommandBufferAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandPool = m_EruptDevice.GetCommandPool();
+		allocInfo.commandBufferCount = static_cast<uint32_t>(m_CommandBuffers.size());
+
+		if (vkAllocateCommandBuffers(m_EruptDevice.Device(), &allocInfo, m_CommandBuffers.data()) != VK_SUCCESS)
+		{
+			ERUPT_CORE_ERROR("Failed to create command buffers!");
+			throw std::runtime_error("Failed to create command buffers!");
+		}
+
+		for (int i = 0; i < m_CommandBuffers.size(); i++)
+		{
+			VkCommandBufferBeginInfo beginInfo{};
+			beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+			if (vkBeginCommandBuffer(m_CommandBuffers[i], &beginInfo) != VK_SUCCESS)
+			{
+				ERUPT_CORE_ERROR("Failed to begin recording command buffer!");
+				throw std::runtime_error("Failed to begin recording command buffer!");
+			}
+
+			VkRenderPassBeginInfo renderPassInfo{};
+			renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+			renderPassInfo.renderPass = m_EruptSwapChain.GetRenderPass();
+			renderPassInfo.framebuffer = m_EruptSwapChain.GetFrameBuffer(i);
+
+			renderPassInfo.renderArea.offset = { 0,0 };
+			renderPassInfo.renderArea.extent = m_EruptSwapChain.GetSwapChainExtent();
+
+			std::array<VkClearValue, 2> clearValues{};
+			clearValues[0].color = { 0.1f, 0.1f, 0.1f, 1.0f };
+			clearValues[1].depthStencil = { 1.0f, 0 };
+			renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+			renderPassInfo.pClearValues = clearValues.data();
+
+			vkCmdBeginRenderPass(m_CommandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+			m_EruptPipeline->Bind(m_CommandBuffers[i]);
+			vkCmdDraw(m_CommandBuffers[i], 3, 1, 0, 0);
+
+			vkCmdEndRenderPass(m_CommandBuffers[i]);
+			if (vkEndCommandBuffer(m_CommandBuffers[i]) != VK_SUCCESS)
+			{
+				ERUPT_CORE_ERROR("Failed to record command buffer!");
+				throw std::runtime_error("Failed to record command buffer!");
+			}
+		}
 	}
 }

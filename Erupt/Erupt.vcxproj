@@ -133,14 +133,20 @@
   <ItemGroup>
     <ClCompile Include="source\core\Application.cpp" />
     <ClCompile Include="source\core\FileIO.cpp" />
+    <ClCompile Include="source\graphics\EruptDevice.cpp" />
     <ClCompile Include="source\graphics\EruptPipeline.cpp" />
+    <ClCompile Include="source\graphics\EruptRenderer.cpp" />
+    <ClCompile Include="source\graphics\EruptSwapChain.cpp" />
     <ClCompile Include="source\graphics\EruptWindow.cpp" />
     <ClCompile Include="source\core\Log.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\core\Application.h" />
     <ClInclude Include="headers\core\FileIO.h" />
+    <ClInclude Include="headers\graphics\EruptDevice.h" />
     <ClInclude Include="headers\graphics\EruptPipeline.h" />
+    <ClInclude Include="headers\graphics\EruptRenderer.h" />
+    <ClInclude Include="headers\graphics\EruptSwapChain.h" />
     <ClInclude Include="headers\graphics\EruptWindow.h" />
     <ClInclude Include="headers\core\Log.h" />
   </ItemGroup>

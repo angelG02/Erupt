@@ -18,8 +18,12 @@ namespace Erupt
 
 		bool ShouldClose();
 
+		void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+
+		VkExtent2D GetExtent() { return { static_cast<uint32_t>(m_Width), static_cast<uint32_t>(m_Height) }; }
+
 	private:
-		void Initialize();
+		void Init();
 
 	private:
 		const int m_Width;

@@ -1,10 +1,14 @@
 #include "graphics/EruptWindow.h"
 
+#include "core/Log.h"
+
+#include <stdexcept>
+
 namespace Erupt
 {
 	Window::Window(int width, int height, const std::string& name) : m_Width(width), m_Height(height), m_WindowName(name)
 	{
-		Initialize();
+		Init();
 	}
 
 	Window::~Window()
@@ -13,7 +17,7 @@ namespace Erupt
 		glfwTerminate();
 	}
 
-	void Window::Initialize()
+	void Window::Init()
 	{
 		glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -25,6 +29,15 @@ namespace Erupt
 	bool Window::ShouldClose()
 	{
 		return glfwWindowShouldClose(m_Window);
+	}
+
+	void Window::CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface)
+	{
+		if (glfwCreateWindowSurface(instance, m_Window, nullptr, surface) != VK_SUCCESS)
+		{
+			ERUPT_CORE_ERROR("Failed to create window surface!");
+			throw std::runtime_error("failed to create window surface");
+		}
 	}
 
 } // namespace Erupt
