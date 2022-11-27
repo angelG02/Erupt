@@ -17,7 +17,9 @@ namespace Erupt {
 		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 		void* pUserData) 
 	{
-		std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+		std::cerr << "----------------" << std::endl;
+		ERUPT_CORE_ERROR("validation layer: {0}", pCallbackData->pMessage);
+		std::cerr << "----------------" << std::endl;
 
 		return VK_FALSE;
 	}
