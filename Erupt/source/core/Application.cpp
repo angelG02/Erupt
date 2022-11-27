@@ -10,14 +10,15 @@ namespace Erupt
 	{
 		Log::Init();
 		FileIO::Init();
-		m_EruptPipeline.Init();
+
+		m_EruptRenderer.Init();
 
 		ERUPT_CORE_INFO("Initialized Erupt Engine!");
 	}
 
 	void Application::Run()
 	{
-		while (!m_EruptWindow.ShouldClose())
+		while (!m_EruptRenderer.GetWindow().ShouldClose())
 		{
 			glfwPollEvents();
 		}
