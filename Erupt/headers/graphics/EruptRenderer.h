@@ -4,6 +4,8 @@
 #include "graphics/EruptPipeline.h"
 #include "graphics/EruptSwapChain.h"
 
+#include "graphics/Model.h"
+
 #include "core/Log.h"
 
 #include <memory>
@@ -34,6 +36,8 @@ namespace Erupt
 		void CreatePipeline();
 		void CreateCommandBuffers();
 
+		void LoadModels();
+
 	private:
 		Window							m_EruptWindow{ WINDOW_WIDTH, WINDOW_HEIGHT, "Henlo Vulkan!" };
 		EruptDevice						m_EruptDevice{ m_EruptWindow };
@@ -43,6 +47,8 @@ namespace Erupt
 		VkPipelineLayout				m_PipelineLayout;
 
 		std::vector<VkCommandBuffer>	m_CommandBuffers;
+
+		std::unique_ptr<Model>			m_Model;
 	};
 
 }

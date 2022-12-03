@@ -39,6 +39,9 @@
     <ClCompile Include="source\graphics\EruptRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\graphics\Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\graphics\EruptWindow.h">
@@ -63,6 +66,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="headers\graphics\EruptRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\graphics\Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
