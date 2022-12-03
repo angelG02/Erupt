@@ -36,12 +36,15 @@ namespace Erupt
 		void CreatePipeline();
 		void CreateCommandBuffers();
 
+		void RecreateSwapchain();
+		void RecordCommandBuffer(int imageIndex);
+
 		void LoadModels();
 
 	private:
 		Window							m_EruptWindow{ WINDOW_WIDTH, WINDOW_HEIGHT, "Henlo Vulkan!" };
 		EruptDevice						m_EruptDevice{ m_EruptWindow };
-		EruptSwapChain					m_EruptSwapChain{ m_EruptDevice, m_EruptWindow.GetExtent() };
+		std::unique_ptr<EruptSwapChain>	m_EruptSwapChain;
 
 		std::unique_ptr<EruptPipeline>	m_EruptPipeline;
 		VkPipelineLayout				m_PipelineLayout;
