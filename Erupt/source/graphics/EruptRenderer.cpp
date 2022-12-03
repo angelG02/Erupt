@@ -17,7 +17,6 @@ namespace Erupt
 		m_EruptDevice.Init();
 		
 		CreatePipelineLayout();
-		
 		RecreateSwapchain();
 
 		LoadModels();
@@ -80,8 +79,11 @@ namespace Erupt
 
 	void EruptRenderer::CreatePipeline()
 	{
+		assert(m_EruptSwapChain != nullptr && "Cannot create pipeline before swapchain!");
+		assert(m_PipelineLayout != nullptr && "Cannot create pipeline before pipeline layout!");
+
 		PipelineConfigInfo pipelineConfig{};
-		EruptPipeline::DefaultPipelineConfigInfo(pipelineConfig, m_EruptSwapChain->Width(), m_EruptSwapChain->Height());
+		EruptPipeline::DefaultPipelineConfigInfo(pipelineConfig);
 		pipelineConfig.renderPass = m_EruptSwapChain->GetRenderPass();
 		pipelineConfig.pipelineLayout = m_PipelineLayout;
 
@@ -138,6 +140,17 @@ namespace Erupt
 
 		vkCmdBeginRenderPass(m_CommandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
+		VkViewport viewport{};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = static_cast<float>(m_EruptSwapChain->GetSwapChainExtent().width);
+		viewport.height = static_cast<float>(m_EruptSwapChain->GetSwapChainExtent().height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		VkRect2D scissor{ {0,0}, m_EruptSwapChain->GetSwapChainExtent() };
+		vkCmdSetViewport(m_CommandBuffers[imageIndex], 0, 1, &viewport);
+		vkCmdSetScissor(m_CommandBuffers[imageIndex], 0, 1, &scissor);
+
 		m_EruptPipeline->Bind(m_CommandBuffers[imageIndex]);
 		m_Model->Bind(m_CommandBuffers[imageIndex]);
 		m_Model->Draw(m_CommandBuffers[imageIndex]);
@@ -148,6 +161,12 @@ namespace Erupt
 			ERUPT_CORE_ERROR("Failed to record command buffer!");
 			throw std::runtime_error("Failed to record command buffer!");
 		}
+	}
+
+	void EruptRenderer::FreeCommandBuffers()
+	{
+		vkFreeCommandBuffers(m_EruptDevice.Device(), m_EruptDevice.GetCommandPool(), static_cast<uint32_t>(m_CommandBuffers.size()), m_CommandBuffers.data());
+		m_CommandBuffers.clear();
 	}
 
 	void EruptRenderer::RecreateSwapchain()
@@ -162,9 +181,22 @@ namespace Erupt
 		}
 
 		vkDeviceWaitIdle(m_EruptDevice.Device());
-		m_EruptSwapChain = std::make_unique<EruptSwapChain>(m_EruptDevice, extent);
-		m_EruptSwapChain->Init();
 
+		if (m_EruptSwapChain == nullptr)
+		{
+			m_EruptSwapChain = std::make_unique<EruptSwapChain>(m_EruptDevice, extent);
+		}
+		else
+		{
+			m_EruptSwapChain = std::make_unique<EruptSwapChain>(m_EruptDevice, extent, std::move(m_EruptSwapChain));
+			if (m_EruptSwapChain->ImageCount() != m_CommandBuffers.size())
+			{
+				FreeCommandBuffers();
+				CreateCommandBuffers();
+			}
+		}
+
+		// TODO: If render passes are compatible do nothing else:
 		CreatePipeline();
 	}
 

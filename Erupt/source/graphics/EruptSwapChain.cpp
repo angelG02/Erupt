@@ -17,7 +17,16 @@ namespace Erupt
 	EruptSwapChain::EruptSwapChain(EruptDevice& deviceRef, VkExtent2D extent)
 		: m_Device{ deviceRef }, m_WindowExtent{ extent }
 	{
-		
+		Init();
+	}
+
+	EruptSwapChain::EruptSwapChain(EruptDevice& deviceRef, VkExtent2D extent, std::shared_ptr<EruptSwapChain> previous)
+		: m_Device{ deviceRef }, m_WindowExtent{ extent }, m_OldSwapchain(previous)
+	{
+		Init();
+
+		// Clear old swapchain since we dont need it anymore
+		m_OldSwapchain = nullptr;
 	}
 
 	void Erupt::EruptSwapChain::Init()
@@ -185,7 +194,7 @@ namespace Erupt
 		createInfo.presentMode = presentMode;
 		createInfo.clipped = VK_TRUE;
 
-		createInfo.oldSwapchain = VK_NULL_HANDLE;
+		createInfo.oldSwapchain = m_OldSwapchain == nullptr ? VK_NULL_HANDLE : m_OldSwapchain->m_SwapChain;
 
 		if (vkCreateSwapchainKHR(m_Device.Device(), &createInfo, nullptr, &m_SwapChain) != VK_SUCCESS)
 		{

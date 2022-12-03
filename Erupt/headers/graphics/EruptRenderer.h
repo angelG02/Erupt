@@ -35,6 +35,7 @@ namespace Erupt
 		void CreatePipelineLayout();
 		void CreatePipeline();
 		void CreateCommandBuffers();
+		void FreeCommandBuffers();
 
 		void RecreateSwapchain();
 		void RecordCommandBuffer(int imageIndex);

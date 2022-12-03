@@ -6,6 +6,7 @@
 #include <vulkan/vulkan.h>
 
 // std lib headers
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -18,6 +19,7 @@ namespace Erupt
 		static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
 		EruptSwapChain(EruptDevice& deviceRef, VkExtent2D m_WindowExtent);
+		EruptSwapChain(EruptDevice& deviceRef, VkExtent2D m_WindowExtent, std::shared_ptr<EruptSwapChain> previous);
 		~EruptSwapChain();
 
 		void Init();
@@ -57,28 +59,30 @@ namespace Erupt
 		VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
 	private:
-		VkFormat					m_SwapChainImageFormat;
-		VkExtent2D					m_SwapChainExtent;
+		VkFormat							m_SwapChainImageFormat;
+		VkExtent2D							m_SwapChainExtent;
 
-		std::vector<VkFramebuffer>	m_SwapChainFramebuffers;
+		std::vector<VkFramebuffer>			m_SwapChainFramebuffers;
 		VkRenderPass m_RenderPass;
 
-		std::vector<VkImage>		m_DepthImages;
-		std::vector<VkDeviceMemory> m_DepthImageMemorys;
-		std::vector<VkImageView>	m_DepthImageViews;
-		std::vector<VkImage>		m_SwapChainImages;
-		std::vector<VkImageView>	m_SwapChainImageViews;
+		std::vector<VkImage>				m_DepthImages;
+		std::vector<VkDeviceMemory>			m_DepthImageMemorys;
+		std::vector<VkImageView>			m_DepthImageViews;
+		std::vector<VkImage>				m_SwapChainImages;
+		std::vector<VkImageView>			m_SwapChainImageViews;
 
-		EruptDevice&				m_Device;
-		VkExtent2D					m_WindowExtent;
+		EruptDevice&						m_Device;
+		VkExtent2D							m_WindowExtent;
 
-		VkSwapchainKHR				m_SwapChain;
+		VkSwapchainKHR						m_SwapChain;
+		std::shared_ptr<EruptSwapChain>		m_OldSwapchain;
 
-		std::vector<VkSemaphore>	m_ImageAvailableSemaphores;
-		std::vector<VkSemaphore>	m_RenderFinishedSemaphores;
-		std::vector<VkFence>		m_InFlightFences;
-		std::vector<VkFence>		m_ImagesInFlight;
-		size_t						m_CurrentFrame = 0;
+		std::vector<VkSemaphore>			m_ImageAvailableSemaphores;
+		std::vector<VkSemaphore>			m_RenderFinishedSemaphores;
+		std::vector<VkFence>				m_InFlightFences;
+		std::vector<VkFence>				m_ImagesInFlight;
+		size_t								m_CurrentFrame = 0;
+		
 	};
 
 }  // namespace lve

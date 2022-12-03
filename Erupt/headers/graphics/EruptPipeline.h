@@ -9,8 +9,6 @@ namespace Erupt
 {
 	struct PipelineConfigInfo
 	{
-		VkViewport viewport;
-		VkRect2D scissor;
 		VkPipelineViewportStateCreateInfo viewportInfo;
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
 		VkPipelineRasterizationStateCreateInfo rasterizationInfo;
@@ -18,6 +16,9 @@ namespace Erupt
 		VkPipelineColorBlendAttachmentState colorBlendAttachment;
 		VkPipelineColorBlendStateCreateInfo colorBlendInfo;
 		VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
+		std::vector<VkDynamicState> dynamicStateEnables;
+		VkPipelineDynamicStateCreateInfo dynamicStateInfo;
+
 		VkPipelineLayout pipelineLayout = nullptr;
 		VkRenderPass renderPass = nullptr;
 		uint32_t subpass = 0;
@@ -40,7 +41,7 @@ namespace Erupt
 		void Init();
 		void Bind(VkCommandBuffer commandBuffer);
 
-		static void DefaultPipelineConfigInfo(PipelineConfigInfo& configInfo, uint32_t width, uint32_t height);
+		static void DefaultPipelineConfigInfo(PipelineConfigInfo& configInfo);
 
 	private:
 		void CreateGraphicsPipeline(
