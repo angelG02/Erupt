@@ -35,7 +35,7 @@ namespace Erupt
 		~EruptPipeline();
 
 		EruptPipeline(const EruptPipeline&) = delete;
-		void operator=(const EruptPipeline&) = delete;
+		EruptPipeline& operator=(const EruptPipeline&) = delete;
 
 		void Init();
 		void Bind(VkCommandBuffer commandBuffer);

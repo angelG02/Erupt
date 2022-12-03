@@ -41,7 +41,7 @@ namespace Erupt {
 
 		// Not copyable or movable
 		EruptDevice(const EruptDevice&) = delete;
-		void operator=(const EruptDevice&) = delete;
+		EruptDevice& operator=(const EruptDevice&) = delete;
 		EruptDevice(EruptDevice&&) = delete;
 		EruptDevice& operator=(EruptDevice&&) = delete;
 

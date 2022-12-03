@@ -23,7 +23,7 @@ namespace Erupt
 		void Init();
 
 		EruptSwapChain(const EruptSwapChain&) = delete;
-		void operator=(const EruptSwapChain&) = delete;
+		EruptSwapChain& operator=(const EruptSwapChain&) = delete;
 
 		VkFramebuffer GetFrameBuffer(int index) { return m_SwapChainFramebuffers[index]; }
 		VkRenderPass GetRenderPass() { return m_RenderPass; }
