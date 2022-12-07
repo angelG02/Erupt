@@ -4,7 +4,7 @@
 #include "graphics/EruptPipeline.h"
 #include "graphics/EruptSwapChain.h"
 
-#include "graphics/Model.h"
+#include "ECS/Entity.h"
 
 #include "core/Log.h"
 
@@ -40,7 +40,8 @@ namespace Erupt
 		void RecreateSwapchain();
 		void RecordCommandBuffer(int imageIndex);
 
-		void LoadModels();
+		void LoadEntities();
+		void RenderEntities(VkCommandBuffer commandBuffer);
 
 	private:
 		Window							m_EruptWindow{ WINDOW_WIDTH, WINDOW_HEIGHT, "Henlo Vulkan!" };
@@ -52,7 +53,7 @@ namespace Erupt
 
 		std::vector<VkCommandBuffer>	m_CommandBuffers;
 
-		std::unique_ptr<Model>			m_Model;
+		std::vector<Entity>				m_Entities;
 	};
 
 }

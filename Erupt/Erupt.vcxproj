@@ -148,6 +148,7 @@
   <ItemGroup>
     <ClInclude Include="headers\core\Application.h" />
     <ClInclude Include="headers\core\FileIO.h" />
+    <ClInclude Include="headers\ECS\Entity.h" />
     <ClInclude Include="headers\graphics\EruptDevice.h" />
     <ClInclude Include="headers\graphics\EruptPipeline.h" />
     <ClInclude Include="headers\graphics\EruptRenderer.h" />

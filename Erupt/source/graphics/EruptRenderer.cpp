@@ -2,6 +2,8 @@
 
 #include "core/FileIO.h"
 
+#include <glm/gtc/constants.hpp>
+
 #include <stdexcept>
 #include <array>
 
@@ -26,7 +28,7 @@ namespace Erupt
 		CreatePipelineLayout();
 		RecreateSwapchain();
 
-		LoadModels();
+		LoadEntities();
 
 		CreatePipeline();
 		CreateCommandBuffers();
@@ -127,9 +129,6 @@ namespace Erupt
 
 	void EruptRenderer::RecordCommandBuffer(int imageIndex)
 	{
-		static int frame = 0;
-		frame = (frame + 1) % 100;
-
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -166,25 +165,7 @@ namespace Erupt
 		vkCmdSetViewport(m_CommandBuffers[imageIndex], 0, 1, &viewport);
 		vkCmdSetScissor(m_CommandBuffers[imageIndex], 0, 1, &scissor);
 
-		m_EruptPipeline->Bind(m_CommandBuffers[imageIndex]);
-		m_Model->Bind(m_CommandBuffers[imageIndex]);
-
-		for (int j = 0; j < 4; j++)
-		{
-			SimplePushConstantData push{};
-			push.offset = { -0.5f + frame * 0.02f, -0.4f + j * 0.25f };
-			push.color = { 0.0f, 0.0f, 0.2f + 0.2f * j };
-
-			vkCmdPushConstants(
-				m_CommandBuffers[imageIndex],
-				m_PipelineLayout, 
-				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-				0,
-				sizeof(SimplePushConstantData),
-				&push);
-			
-			m_Model->Draw(m_CommandBuffers[imageIndex]);
-		}
+		RenderEntities(m_CommandBuffers[imageIndex]);
 
 		vkCmdEndRenderPass(m_CommandBuffers[imageIndex]);
 		if (vkEndCommandBuffer(m_CommandBuffers[imageIndex]) != VK_SUCCESS)
@@ -231,7 +212,7 @@ namespace Erupt
 		CreatePipeline();
 	}
 
-	void EruptRenderer::LoadModels()
+	void EruptRenderer::LoadEntities()
 	{
 		std::vector<Model::Vertex> vertices{
 			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
@@ -239,6 +220,39 @@ namespace Erupt
 			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
 		};
 
-		m_Model = std::make_unique<Model>(m_EruptDevice, vertices);
+		auto model = std::make_shared<Model>(m_EruptDevice, vertices);
+
+		auto triangle = Entity::CreateEntity();
+		triangle.m_Model = model;
+		triangle.m_Color = { .1f, .8f, .1f };
+		triangle.m_Transform2d.translation.x = .2f;
+		triangle.m_Transform2d.scale = { 2.f, .5f };
+		triangle.m_Transform2d.rotation = .25f * glm::two_pi<float>();
+
+		m_Entities.emplace_back(std::move(triangle));
+	}
+
+	void EruptRenderer::RenderEntities(VkCommandBuffer commandBuffer)
+	{
+		m_EruptPipeline->Bind(commandBuffer);
+
+		for (auto& entity : m_Entities)
+		{
+			SimplePushConstantData push{};
+			push.offset = entity.m_Transform2d.translation;
+			push.color = entity.m_Color;
+			push.transform = entity.m_Transform2d.mat2();
+
+			vkCmdPushConstants(
+				commandBuffer,
+				m_PipelineLayout,
+				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+				0,
+				sizeof(SimplePushConstantData),
+				&push);
+
+			entity.m_Model->Bind(commandBuffer);
+			entity.m_Model->Draw(commandBuffer);
+		}
 	}
 }
