@@ -42,6 +42,9 @@
     <ClCompile Include="source\graphics\Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\graphics\systems\SimpleRenderSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\graphics\EruptWindow.h">
@@ -72,6 +75,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="headers\ECS\Entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\graphics\systems\SimpleRenderSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -18,7 +18,7 @@ namespace Erupt
 		const PipelineConfigInfo& configInfo)
 		: m_Device(device), m_VertFilepath(vertFilepath), m_FragFilepath(fragFilepath), m_ConfigInfo(configInfo), m_VertShaderModule(nullptr), m_FragShaderModule(nullptr), m_GraphicsPipeline(nullptr)
 	{
-		
+		Init();
 	}
 
 	EruptPipeline::~EruptPipeline()

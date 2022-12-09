@@ -2,48 +2,39 @@
 
 #include "core/FileIO.h"
 
-#include <glm/gtc/constants.hpp>
-
 #include <stdexcept>
 #include <array>
 
 namespace Erupt
 {
-	struct SimplePushConstantData
+	EruptRenderer::EruptRenderer(Window& window, EruptDevice& device)
+		: m_EruptWindow(window), m_EruptDevice(device)
 	{
-		glm::mat2 transform{ 1.f };
-		glm::vec2 offset;
-		alignas(16) glm::vec3 color;
-	};
+		Init();
+	}
 
 	EruptRenderer::~EruptRenderer()
 	{
-		vkDestroyPipelineLayout(m_EruptDevice.Device(), m_PipelineLayout, nullptr);
+		FreeCommandBuffers();
 	}
 
-	void Erupt::EruptRenderer::Init()
+	void EruptRenderer::Init()
 	{
-		m_EruptDevice.Init();
-		
-		CreatePipelineLayout();
 		RecreateSwapchain();
-
-		LoadEntities();
-
-		CreatePipeline();
 		CreateCommandBuffers();
 	}
 
-	void EruptRenderer::DrawFrame()
+	VkCommandBuffer EruptRenderer::BeginFrame()
 	{
-		uint32_t imageIndex;
-		auto result = m_EruptSwapChain->AcquireNextImage(&imageIndex);
+		assert(!m_IsFrameStarted && "Cannot call BeginFrame while already in progress");
+
+		auto result = m_EruptSwapChain->AcquireNextImage(&m_CurrentImageIndex);
 
 		// Occurs when window is resized
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 		{
 			RecreateSwapchain();
-			return;
+			return nullptr;
 		}
 
 		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
@@ -52,67 +43,95 @@ namespace Erupt
 			throw std::runtime_error("Failed to acquire swap chain image!");
 		}
 
-		RecordCommandBuffer(imageIndex);
+		m_IsFrameStarted = true;
 
-		result = m_EruptSwapChain->SubmitCommandBuffers(&m_CommandBuffers[imageIndex], &imageIndex);
+		auto commandBuffer = GetCurrentCommandBuffer();
+
+		VkCommandBufferBeginInfo beginInfo{};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+		if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
+		{
+			ERUPT_CORE_ERROR("Failed to begin recording command buffer!");
+			throw std::runtime_error("Failed to begin recording command buffer!");
+		}
+
+		return commandBuffer;
+	}
+
+	void EruptRenderer::EndFrame()
+	{
+		assert(m_IsFrameStarted && "Cannot call EndFrame frame is not in progress!");
+
+		auto commandBuffer = GetCurrentCommandBuffer();
+
+		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
+		{
+			ERUPT_CORE_ERROR("Failed to record command buffer!");
+			throw std::runtime_error("Failed to record command buffer!");
+		}
+
+		auto result = m_EruptSwapChain->SubmitCommandBuffers(&commandBuffer, &m_CurrentImageIndex);
 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_EruptWindow.WasWindowResized())
 		{
 			m_EruptWindow.ResetWindowResizedFlag();
 			RecreateSwapchain();
-			return;
 		}
-
-		if (result != VK_SUCCESS)
+		else if (result != VK_SUCCESS)
 		{
 			ERUPT_CORE_ERROR("Failed to present swap chain image!");
 			throw std::runtime_error("Failed to present swap chain image!");
 		}
+
+		m_IsFrameStarted = false;
+		m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % EruptSwapChain::MAX_FRAMES_IN_FLIGHT;
 	}
 
-	void EruptRenderer::CreatePipelineLayout()
+	void EruptRenderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer)
 	{
-		VkPushConstantRange pushConstantRange{};
-		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-		pushConstantRange.offset = 0;
-		pushConstantRange.size = sizeof(SimplePushConstantData);
+		assert(m_IsFrameStarted && "Cannot begin render pass when frame is not in progress!");
+		assert(commandBuffer == GetCurrentCommandBuffer() && "Cannot begin render pass on a command buffer from a different frame!");
 
-		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = 0;
-		pipelineLayoutInfo.pSetLayouts = nullptr;
-		pipelineLayoutInfo.pushConstantRangeCount = 1;
-		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
+		VkRenderPassBeginInfo renderPassInfo{};
+		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassInfo.renderPass = m_EruptSwapChain->GetRenderPass();
+		renderPassInfo.framebuffer = m_EruptSwapChain->GetFrameBuffer(m_CurrentImageIndex);
 
-		if (vkCreatePipelineLayout(m_EruptDevice.Device(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS)
-		{
-			ERUPT_CORE_ERROR("Failed to create pipeline layout!");
-			throw std::runtime_error("Failed to create pipeline layout!");
-		}
+		renderPassInfo.renderArea.offset = { 0,0 };
+		renderPassInfo.renderArea.extent = m_EruptSwapChain->GetSwapChainExtent();
+
+		std::array<VkClearValue, 2> clearValues{};
+		clearValues[0].color = { 0.02f, 0.0f, 0.04f, 1.0f };
+		clearValues[1].depthStencil = { 1.0f, 0 };
+		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+		renderPassInfo.pClearValues = clearValues.data();
+
+		vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		VkViewport viewport{};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = static_cast<float>(m_EruptSwapChain->GetSwapChainExtent().width);
+		viewport.height = static_cast<float>(m_EruptSwapChain->GetSwapChainExtent().height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		VkRect2D scissor{ {0,0}, m_EruptSwapChain->GetSwapChainExtent() };
+		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
 	}
-
-	void EruptRenderer::CreatePipeline()
+	void EruptRenderer::EndSwapChainRenderPass(VkCommandBuffer commandBuffer)
 	{
-		assert(m_EruptSwapChain != nullptr && "Cannot create pipeline before swapchain!");
-		assert(m_PipelineLayout != nullptr && "Cannot create pipeline before pipeline layout!");
+		assert(m_IsFrameStarted && "Cannot end render pass when frame is not in progress!");
+		assert(commandBuffer == GetCurrentCommandBuffer() && "Cannot end render pass on a command buffer from a different frame!");
 
-		PipelineConfigInfo pipelineConfig{};
-		EruptPipeline::DefaultPipelineConfigInfo(pipelineConfig);
-		pipelineConfig.renderPass = m_EruptSwapChain->GetRenderPass();
-		pipelineConfig.pipelineLayout = m_PipelineLayout;
-
-		m_EruptPipeline = std::make_unique<EruptPipeline>(
-			m_EruptDevice,
-			"shaders/compiled/simple_shader.vert.spv",
-			"shaders/compiled/simple_shader.frag.spv",
-			pipelineConfig
-			);
-		m_EruptPipeline->Init();
+		vkCmdEndRenderPass(commandBuffer);
 	}
 
 	void EruptRenderer::CreateCommandBuffers()
 	{
-		m_CommandBuffers.resize(m_EruptSwapChain->ImageCount());
+		m_CommandBuffers.resize(EruptSwapChain::MAX_FRAMES_IN_FLIGHT);
 
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -124,54 +143,6 @@ namespace Erupt
 		{
 			ERUPT_CORE_ERROR("Failed to create command buffers!");
 			throw std::runtime_error("Failed to create command buffers!");
-		}
-	}
-
-	void EruptRenderer::RecordCommandBuffer(int imageIndex)
-	{
-		VkCommandBufferBeginInfo beginInfo{};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-		if (vkBeginCommandBuffer(m_CommandBuffers[imageIndex], &beginInfo) != VK_SUCCESS)
-		{
-			ERUPT_CORE_ERROR("Failed to begin recording command buffer!");
-			throw std::runtime_error("Failed to begin recording command buffer!");
-		}
-
-		VkRenderPassBeginInfo renderPassInfo{};
-		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassInfo.renderPass = m_EruptSwapChain->GetRenderPass();
-		renderPassInfo.framebuffer = m_EruptSwapChain->GetFrameBuffer(imageIndex);
-
-		renderPassInfo.renderArea.offset = { 0,0 };
-		renderPassInfo.renderArea.extent = m_EruptSwapChain->GetSwapChainExtent();
-
-		std::array<VkClearValue, 2> clearValues{};
-		clearValues[0].color = { 0.02f, 0.0f, 0.04f, 1.0f };
-		clearValues[1].depthStencil = { 1.0f, 0 };
-		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-		renderPassInfo.pClearValues = clearValues.data();
-
-		vkCmdBeginRenderPass(m_CommandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-		VkViewport viewport{};
-		viewport.x = 0.0f;
-		viewport.y = 0.0f;
-		viewport.width = static_cast<float>(m_EruptSwapChain->GetSwapChainExtent().width);
-		viewport.height = static_cast<float>(m_EruptSwapChain->GetSwapChainExtent().height);
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-		VkRect2D scissor{ {0,0}, m_EruptSwapChain->GetSwapChainExtent() };
-		vkCmdSetViewport(m_CommandBuffers[imageIndex], 0, 1, &viewport);
-		vkCmdSetScissor(m_CommandBuffers[imageIndex], 0, 1, &scissor);
-
-		RenderEntities(m_CommandBuffers[imageIndex]);
-
-		vkCmdEndRenderPass(m_CommandBuffers[imageIndex]);
-		if (vkEndCommandBuffer(m_CommandBuffers[imageIndex]) != VK_SUCCESS)
-		{
-			ERUPT_CORE_ERROR("Failed to record command buffer!");
-			throw std::runtime_error("Failed to record command buffer!");
 		}
 	}
 
@@ -200,59 +171,14 @@ namespace Erupt
 		}
 		else
 		{
-			m_EruptSwapChain = std::make_unique<EruptSwapChain>(m_EruptDevice, extent, std::move(m_EruptSwapChain));
-			if (m_EruptSwapChain->ImageCount() != m_CommandBuffers.size())
+			std::shared_ptr<EruptSwapChain> oldSwapChain = std::move(m_EruptSwapChain);
+			m_EruptSwapChain = std::make_unique<EruptSwapChain>(m_EruptDevice, extent, oldSwapChain);
+
+			if (!oldSwapChain->CompareSwapFormats(*m_EruptSwapChain.get()))
 			{
-				FreeCommandBuffers();
-				CreateCommandBuffers();
+				ERUPT_CORE_ERROR("Swap chain image(or depth) format has changed!");
+				throw std::runtime_error("Swap chain image(or depth) format has changed!");
 			}
-		}
-
-		// TODO: If render passes are compatible do nothing else:
-		CreatePipeline();
-	}
-
-	void EruptRenderer::LoadEntities()
-	{
-		std::vector<Model::Vertex> vertices{
-			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-			{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-		};
-
-		auto model = std::make_shared<Model>(m_EruptDevice, vertices);
-
-		auto triangle = Entity::CreateEntity();
-		triangle.m_Model = model;
-		triangle.m_Color = { .1f, .8f, .1f };
-		triangle.m_Transform2d.translation.x = .2f;
-		triangle.m_Transform2d.scale = { 2.f, .5f };
-		triangle.m_Transform2d.rotation = .25f * glm::two_pi<float>();
-
-		m_Entities.emplace_back(std::move(triangle));
-	}
-
-	void EruptRenderer::RenderEntities(VkCommandBuffer commandBuffer)
-	{
-		m_EruptPipeline->Bind(commandBuffer);
-
-		for (auto& entity : m_Entities)
-		{
-			SimplePushConstantData push{};
-			push.offset = entity.m_Transform2d.translation;
-			push.color = entity.m_Color;
-			push.transform = entity.m_Transform2d.mat2();
-
-			vkCmdPushConstants(
-				commandBuffer,
-				m_PipelineLayout,
-				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-				0,
-				sizeof(SimplePushConstantData),
-				&push);
-
-			entity.m_Model->Bind(commandBuffer);
-			entity.m_Model->Draw(commandBuffer);
 		}
 	}
 }

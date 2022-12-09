@@ -1,59 +1,66 @@
 #pragma once
 
 #include "graphics/EruptWindow.h"
-#include "graphics/EruptPipeline.h"
 #include "graphics/EruptSwapChain.h"
-
-#include "ECS/Entity.h"
 
 #include "core/Log.h"
 
 #include <memory>
 #include <vector>
+#include <cassert>
 
 namespace Erupt
 {
-	static constexpr int WINDOW_WIDTH = 800;
-	static constexpr int WINDOW_HEIGHT = 600;
 
 	class EruptRenderer
 	{
 	public:
-		EruptRenderer() = default;
+		EruptRenderer(Window& window, EruptDevice& device);
 		~EruptRenderer();
 
 		EruptRenderer(const EruptRenderer&) = delete;
 		EruptRenderer& operator=(const EruptRenderer&) = delete;
 
 		void Init();
-		void DrawFrame();
 
-		Window& GetWindow() { return m_EruptWindow; }
-		EruptDevice& GetDevice() { return m_EruptDevice; }
+		VkCommandBuffer BeginFrame();
+		void EndFrame();
+
+		void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer);
+		void EndSwapChainRenderPass(VkCommandBuffer commandBuffer);
+
+		inline bool IsFrameInProgress() const { return m_IsFrameStarted; }
+
+		inline VkRenderPass GetSwapChainRenderPass() const { return m_EruptSwapChain->GetRenderPass(); }
+
+		inline VkCommandBuffer GetCurrentCommandBuffer() const
+		{
+			assert(m_IsFrameStarted && "Cannot get command buffer when frame not in progress");
+			return m_CommandBuffers[m_CurrentFrameIndex];
+		}
+
+		inline int GetFrameIndex() const 
+		{ 
+			assert(m_IsFrameStarted && "Cannot get current frame incex when frame not in progress");
+			return m_CurrentFrameIndex;
+		};
 
 	private:
-		void CreatePipelineLayout();
-		void CreatePipeline();
 		void CreateCommandBuffers();
 		void FreeCommandBuffers();
 
 		void RecreateSwapchain();
-		void RecordCommandBuffer(int imageIndex);
-
-		void LoadEntities();
-		void RenderEntities(VkCommandBuffer commandBuffer);
 
 	private:
-		Window							m_EruptWindow{ WINDOW_WIDTH, WINDOW_HEIGHT, "Henlo Vulkan!" };
-		EruptDevice						m_EruptDevice{ m_EruptWindow };
+		Window&							m_EruptWindow;
+		EruptDevice&					m_EruptDevice;
 		std::unique_ptr<EruptSwapChain>	m_EruptSwapChain;
-
-		std::unique_ptr<EruptPipeline>	m_EruptPipeline;
-		VkPipelineLayout				m_PipelineLayout;
 
 		std::vector<VkCommandBuffer>	m_CommandBuffers;
 
-		std::vector<Entity>				m_Entities;
+		uint32_t m_CurrentImageIndex = 0;
+		int m_CurrentFrameIndex = 0;
+		bool m_IsFrameStarted = false;
 	};
 
 }

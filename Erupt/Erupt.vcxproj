@@ -144,6 +144,7 @@
     <ClCompile Include="source\graphics\EruptWindow.cpp" />
     <ClCompile Include="source\core\Log.cpp" />
     <ClCompile Include="source\graphics\Model.cpp" />
+    <ClCompile Include="source\graphics\systems\SimpleRenderSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\core\Application.h" />
@@ -156,6 +157,7 @@
     <ClInclude Include="headers\graphics\EruptWindow.h" />
     <ClInclude Include="headers\core\Log.h" />
     <ClInclude Include="headers\graphics\Model.h" />
+    <ClInclude Include="headers\graphics\systems\SimpleRenderSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="compile_shaders.bat" />

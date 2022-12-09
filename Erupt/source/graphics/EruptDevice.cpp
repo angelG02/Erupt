@@ -56,6 +56,7 @@ namespace Erupt {
 	// class member functions
 	EruptDevice::EruptDevice(Window& window) : m_Window(window)
 	{
+		Init();
 	}
 
 	EruptDevice::~EruptDevice() 

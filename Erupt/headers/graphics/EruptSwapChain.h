@@ -45,6 +45,11 @@ namespace Erupt
 		VkResult AcquireNextImage(uint32_t* imageIndex);
 		VkResult SubmitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
 
+		inline bool CompareSwapFormats(const EruptSwapChain& swapChain) const
+		{
+			return swapChain.m_SwapChainImageFormat == m_SwapChainImageFormat && swapChain.m_SwapChainDepthFormat == m_SwapChainDepthFormat;
+		}
+
 	private:
 		void CreateSwapChain();
 		void CreateImageViews();
@@ -60,6 +65,7 @@ namespace Erupt
 
 	private:
 		VkFormat							m_SwapChainImageFormat;
+		VkFormat							m_SwapChainDepthFormat;
 		VkExtent2D							m_SwapChainExtent;
 
 		std::vector<VkFramebuffer>			m_SwapChainFramebuffers;
