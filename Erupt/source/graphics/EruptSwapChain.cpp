@@ -429,7 +429,7 @@ namespace Erupt
 		{
 			if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
 			{
-				//ERUPT_CORE_INFO("Present mode: Mailbox");
+				ERUPT_CORE_INFO("Present mode: Mailbox");
 				return availablePresentMode;
 			}
 		}
@@ -441,7 +441,7 @@ namespace Erupt
 		//   }
 		// }
 
-		//ERUPT_CORE_INFO("Present mode: V-Sync");
+		ERUPT_CORE_INFO("Present mode: V-Sync");
 		return VK_PRESENT_MODE_FIFO_KHR;
 	}
 

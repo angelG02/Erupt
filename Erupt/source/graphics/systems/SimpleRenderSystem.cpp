@@ -7,8 +7,7 @@ namespace Erupt
 {
 	struct SimplePushConstantData
 	{
-		glm::mat2 transform{ 1.f };
-		glm::vec2 offset;
+		glm::mat4 transform{ 1.f };
 		alignas(16) glm::vec3 color;
 	};
 
@@ -73,10 +72,12 @@ namespace Erupt
 
 		for (auto& entity : entities)
 		{
+			entity.m_Transform.rotation.y = glm::mod(entity.m_Transform.rotation.y + 0.01f, glm::two_pi<float>());
+			entity.m_Transform.rotation.x = glm::mod(entity.m_Transform.rotation.x + 0.005f, glm::two_pi<float>());
+
 			SimplePushConstantData push{};
-			push.offset = entity.m_Transform2d.translation;
 			push.color = entity.m_Color;
-			push.transform = entity.m_Transform2d.mat2();
+			push.transform = entity.m_Transform.mat4();
 
 			vkCmdPushConstants(
 				commandBuffer,
