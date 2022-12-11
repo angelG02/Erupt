@@ -65,7 +65,6 @@ namespace Erupt
 			"shaders/compiled/simple_shader.frag.spv",
 			pipelineConfig
 			);
-		m_EruptPipeline->Init();
 	}
 
 	void SimpleRenderSystem::RenderEntities(VkCommandBuffer commandBuffer, std::vector<Entity>& entities)
