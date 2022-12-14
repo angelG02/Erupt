@@ -2,6 +2,8 @@
 
 #include "core/Log.h"
 
+#include <filesystem>
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -14,7 +16,9 @@ namespace Erupt
 	{
 		std::string currentDir = _SOLUTIONDIR;
 
-		m_ResourcesPath = currentDir + "\\resources\\";
+		//m_ResourcesPath = std::filesystem::current_path().append("resources\\").string();
+
+		m_ResourcesPath = currentDir + "resources\\";
 	}
 
 	std::string FileIO::GetResourcesPath()
@@ -30,7 +34,7 @@ namespace Erupt
 
 		if (!file.is_open())
 		{
-			ERUPT_CORE_ERROR("BOOM!");
+			ERUPT_CORE_ERROR("File with path: {0} could not be found. maybe?", (GetResourcesPath() + filePath).c_str());
 			throw std::runtime_error("Failed to open file: " + path);
 		}
 
@@ -57,7 +61,8 @@ namespace Erupt
 			return true;
 		}
 
-		printf("File with path: %s could not be found.\n", (GetResourcesPath() + filePath).c_str());
+		ERUPT_CORE_ERROR("File with path: {0} could not be found. maybe?", (GetResourcesPath() + filePath).c_str());
+		throw std::runtime_error("Failed to open file: " + GetResourcesPath() + filePath);
 
 		return false;
 	}

@@ -2,10 +2,13 @@
 
 int main()
 {
+	//This is cursed
+	Erupt::Application::Init();
+	Erupt::Application engine = Erupt::Application();
+
 	try
 	{
-		Erupt::Application::Init();
-		Erupt::Application::Run();
+		engine.Run();
 	}
 	catch (const std::exception& e)
 	{

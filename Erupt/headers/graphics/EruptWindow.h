@@ -18,12 +18,22 @@ namespace Erupt
 
 		bool ShouldClose();
 
-	private:
-		void Initialize();
+		void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+
+		inline VkExtent2D GetExtent() { return { static_cast<uint32_t>(m_Width), static_cast<uint32_t>(m_Height) }; }
+
+		inline bool WasWindowResized() { return m_FramebufferResized; }
+		inline void ResetWindowResizedFlag() { m_FramebufferResized = false; }
 
 	private:
-		const int m_Width;
-		const int m_Height;
+		void Init();
+
+		static void FramebufferResizeCallback(GLFWwindow* window, int width, int height);
+
+	private:
+		int m_Width;
+		int m_Height;
+		bool m_FramebufferResized = false;
 
 		std::string m_WindowName;
 

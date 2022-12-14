@@ -1,8 +1,8 @@
 #pragma once
 
-#include "graphics/EruptWindow.h"
+#include "graphics/EruptRenderer.h"
 
-#include "Log.h"
+#include "ECS/Entity.h"
 
 namespace Erupt
 {
@@ -12,14 +12,23 @@ namespace Erupt
 	class Application
 	{
 	public:
+		Application();
+		~Application();
+
 		static void Init();
 
-		static void Run();
-	public:
-
+		void Run();
 
 	private:
-		static Window m_EruptWindow;
+		void LoadEntities();
+
+	private:
+		Window							m_EruptWindow{ WINDOW_WIDTH, WINDOW_HEIGHT, "Henlo Vulkan!" };
+		EruptDevice						m_EruptDevice{ m_EruptWindow };
+
+		EruptRenderer					m_EruptRenderer{ m_EruptWindow, m_EruptDevice };
+
+		std::vector<Entity>				m_Entities;
 	};
 
 } // namespace Erupt
