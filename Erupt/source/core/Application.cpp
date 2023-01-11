@@ -1,9 +1,12 @@
 #include "core/Application.h"
 
 #include "core/FileIO.h"
+#include "core/Camera.h"
+
 #include "graphics/systems/SimpleRenderSystem.h"
 
 #include <glm/gtc/constants.hpp>
+#include <chrono>
 
 namespace Erupt
 {
@@ -27,9 +30,23 @@ namespace Erupt
 	void Application::Run()
 	{
 		SimpleRenderSystem simpleRenderSystem{ m_EruptDevice, m_EruptRenderer.GetSwapChainRenderPass() };
+
+		Camera camera{};
+		camera.SetViewDirection(glm::vec3(0.f), glm::vec3(0.f, 0.f, 1.f));
+
+		auto currentTime = std::chrono::high_resolution_clock::now();
+
 		while (!m_EruptWindow.ShouldClose())
 		{
 			glfwPollEvents();
+
+			auto newTime = std::chrono::high_resolution_clock::now();
+			float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+			currentTime = frameTime;
+			
+			float aspectRatio = m_EruptRenderer.GetAspectRatio();
+			//camera.SetOrthographicProjection(-aspectRatio, aspectRatio, -1, 1, -1, 1);
+			camera.SetPerspectiveProjection(glm::radians(50.f), aspectRatio, 0.1f, 10.f);
 
 			if (auto commandBuffer = m_EruptRenderer.BeginFrame())
 			{
@@ -38,7 +55,7 @@ namespace Erupt
 				// end offscreen shadow pass
 
 				m_EruptRenderer.BeginSwapChainRenderPass(commandBuffer);
-				simpleRenderSystem.RenderEntities(commandBuffer, m_Entities);
+				simpleRenderSystem.RenderEntities(commandBuffer, m_Entities, camera);
 				m_EruptRenderer.EndSwapChainRenderPass(commandBuffer);
 				m_EruptRenderer.EndFrame();
 			}
@@ -112,7 +129,7 @@ namespace Erupt
 
 		auto cube = Entity::CreateEntity();
 		cube.m_Model = model;
-		cube.m_Transform.translation = { .0f, .0f, .5f };
+		cube.m_Transform.translation = { .0f, .0f, 2.5f };
 		cube.m_Transform.scale = { .5f, .5f, .5f };
 
 		m_Entities.emplace_back(std::move(cube));
