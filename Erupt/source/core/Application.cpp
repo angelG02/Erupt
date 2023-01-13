@@ -2,6 +2,7 @@
 
 #include "core/FileIO.h"
 #include "core/Camera.h"
+#include "core/Input.h"
 
 #include "graphics/systems/SimpleRenderSystem.h"
 
@@ -34,6 +35,9 @@ namespace Erupt
 		Camera camera{};
 		camera.SetViewDirection(glm::vec3(0.f), glm::vec3(0.f, 0.f, 1.f));
 
+		auto viewerEntity = Entity::CreateEntity();
+		Input cameraControler{};
+
 		auto currentTime = std::chrono::high_resolution_clock::now();
 
 		while (!m_EruptWindow.ShouldClose())
@@ -41,11 +45,16 @@ namespace Erupt
 			glfwPollEvents();
 
 			auto newTime = std::chrono::high_resolution_clock::now();
-			float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
-			currentTime = frameTime;
+			float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+			currentTime = newTime;
+
+			// Max frame time??? For when polling events takes longer?
+			//deltaTime = glm::min(deltaTime, MAX_FRAME_TIME);
+
+			cameraControler.MoveInPlaneXZ(m_EruptWindow.GetWindow(), deltaTime, viewerEntity);
+			camera.SetViewYXZ(viewerEntity.m_Transform.translation, viewerEntity.m_Transform.rotation);
 			
 			float aspectRatio = m_EruptRenderer.GetAspectRatio();
-			//camera.SetOrthographicProjection(-aspectRatio, aspectRatio, -1, 1, -1, 1);
 			camera.SetPerspectiveProjection(glm::radians(50.f), aspectRatio, 0.1f, 10.f);
 
 			if (auto commandBuffer = m_EruptRenderer.BeginFrame())
