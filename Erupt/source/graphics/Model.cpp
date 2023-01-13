@@ -5,16 +5,23 @@
 
 namespace Erupt
 {
-	Model::Model(EruptDevice& device, const std::vector<Vertex>& vertices)
+	Model::Model(EruptDevice& device, const Builder& builder)
 		: m_Device(device)
 	{
-		CreateVertexBuffers(vertices);
+		CreateVertexBuffers(builder.vertices);
+		CreateIndexBuffers(builder.indices);
 	}
 
 	Model::~Model()
 	{
 		vkDestroyBuffer(m_Device.Device(), m_VertexBuffer, nullptr);
 		vkFreeMemory(m_Device.Device(), m_VertexBufferMemory, nullptr);
+
+		if (m_IsIndexed)
+		{
+			vkDestroyBuffer(m_Device.Device(), m_IndexBuffer, nullptr);
+			vkFreeMemory(m_Device.Device(), m_IndexBufferMemory, nullptr);
+		}
 	}
 
 	void Model::Bind(VkCommandBuffer commandBuffer)
@@ -23,11 +30,23 @@ namespace Erupt
 		VkDeviceSize offsets[] = { 0 };
 
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
+
+		if (m_IsIndexed)
+		{
+			vkCmdBindIndexBuffer(commandBuffer, m_IndexBuffer, 0, VK_INDEX_TYPE_UINT32);
+		}
 	}
 
 	void Model::Draw(VkCommandBuffer commandBuffer)
 	{
-		vkCmdDraw(commandBuffer, m_VertexCount, 1, 0, 0);
+		if (m_IsIndexed)
+		{
+			vkCmdDrawIndexed(commandBuffer, m_IndexCount, 1, 0, 0, 0);
+		}
+		else
+		{
+			vkCmdDraw(commandBuffer, m_VertexCount, 1, 0, 0);
+		}
 	}
 
 	void Model::CreateVertexBuffers(const std::vector<Vertex>& vertices)
@@ -49,6 +68,32 @@ namespace Erupt
 		vkMapMemory(m_Device.Device(), m_VertexBufferMemory, 0, bufferSize, 0, &data);
 		memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
 		vkUnmapMemory(m_Device.Device(), m_VertexBufferMemory);
+	}
+
+	void Model::CreateIndexBuffers(const std::vector<uint32_t>& indices)
+	{
+		m_IndexCount = static_cast<uint32_t>(indices.size());
+		m_IsIndexed = m_IndexCount > 0;
+
+		if (!m_IsIndexed)
+		{
+			return;
+		}
+
+		VkDeviceSize bufferSize = sizeof(indices[0]) * m_IndexCount;
+
+		m_Device.CreateBuffer(
+			bufferSize,
+			VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, // Makes the buffer accessible form CPU (Host)??
+			m_IndexBuffer,
+			m_IndexBufferMemory
+		);
+
+		void* data;
+		vkMapMemory(m_Device.Device(), m_IndexBufferMemory, 0, bufferSize, 0, &data);
+		memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
+		vkUnmapMemory(m_Device.Device(), m_IndexBufferMemory);
 	}
 
 	std::vector<VkVertexInputBindingDescription> Model::Vertex::GetBindingDescriptions()

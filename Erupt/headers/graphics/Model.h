@@ -23,7 +23,13 @@ namespace Erupt
 			static std::vector<VkVertexInputAttributeDescription> GetAttributeDescriptions();
 		};
 
-		Model(EruptDevice& device, const std::vector<Vertex>& vertices);
+		struct Builder
+		{
+			std::vector<Vertex> vertices{};
+			std::vector<uint32_t> indices{};
+		};
+
+		Model(EruptDevice& device, const Builder& builder);
 		~Model();
 
 		Model(const Model&) = delete;
@@ -34,6 +40,7 @@ namespace Erupt
 
 	private:
 		void CreateVertexBuffers(const std::vector<Vertex>& vertices);
+		void CreateIndexBuffers(const std::vector<uint32_t>& indices);
 
 	private:
 		EruptDevice& m_Device;
@@ -41,6 +48,11 @@ namespace Erupt
 		VkBuffer m_VertexBuffer;
 		VkDeviceMemory m_VertexBufferMemory;
 		uint32_t m_VertexCount;
+
+		bool m_IsIndexed = false;
+		VkBuffer m_IndexBuffer;
+		VkDeviceMemory m_IndexBufferMemory;
+		uint32_t m_IndexCount;
 	};
 
 }
