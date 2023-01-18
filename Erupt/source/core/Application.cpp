@@ -36,16 +36,18 @@ namespace Erupt
 
 	void Application::Run()
 	{
-		EruptBuffer globalUboBuffer
+		// Creating 2 UBOs for each frame in flight so that there is no need for idling between frames
+		std::vector<std::unique_ptr<EruptBuffer>> uboBuffers(EruptSwapChain::MAX_FRAMES_IN_FLIGHT);
+		for (int i = 0; i < uboBuffers.size(); i++)
 		{
-			m_EruptDevice,
-			sizeof(GlobalUbo),
-			EruptSwapChain::MAX_FRAMES_IN_FLIGHT,
-			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-			m_EruptDevice.properties.limits.minUniformBufferOffsetAlignment
-		};
-		globalUboBuffer.Map();
+			uboBuffers[i] = std::make_unique<EruptBuffer>(
+				m_EruptDevice,
+				sizeof(GlobalUbo),
+				1,
+				VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+			uboBuffers[i]->Map();
+		}
 
 		SimpleRenderSystem simpleRenderSystem{ m_EruptDevice, m_EruptRenderer.GetSwapChainRenderPass() };
 
@@ -77,12 +79,13 @@ namespace Erupt
 			if (auto commandBuffer = m_EruptRenderer.BeginFrame())
 			{
 				int frameIndex = m_EruptRenderer.GetFrameIndex();
+				FrameInfo frameInfo{frameIndex, deltaTime, commandBuffer, camera};
 
 				// Update
 				GlobalUbo ubo{};
 				ubo.viewProjection = camera.GetProjection() * camera.GetView();
-				globalUboBuffer.WriteToIndex(&ubo, frameIndex);
-				globalUboBuffer.FlushIndex(frameIndex);
+				uboBuffers[frameIndex]->WriteToBuffer(&ubo);
+				uboBuffers[frameIndex]->Flush();
 
 				// Render
 
@@ -91,7 +94,7 @@ namespace Erupt
 				// end offscreen shadow pass
 
 				m_EruptRenderer.BeginSwapChainRenderPass(commandBuffer);
-				simpleRenderSystem.RenderEntities(commandBuffer, m_Entities, camera);
+				simpleRenderSystem.RenderEntities(frameInfo, m_Entities);
 				m_EruptRenderer.EndSwapChainRenderPass(commandBuffer);
 				m_EruptRenderer.EndFrame();
 			}

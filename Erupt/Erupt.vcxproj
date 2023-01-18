@@ -159,6 +159,7 @@
     <ClInclude Include="headers\EruptUtils.h" />
     <ClInclude Include="headers\graphics\EruptBuffer.h" />
     <ClInclude Include="headers\graphics\EruptDevice.h" />
+    <ClInclude Include="headers\graphics\EruptFrameInfo.h" />
     <ClInclude Include="headers\graphics\EruptPipeline.h" />
     <ClInclude Include="headers\graphics\EruptRenderer.h" />
     <ClInclude Include="headers\graphics\EruptSwapChain.h" />

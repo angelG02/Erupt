@@ -66,13 +66,13 @@ namespace Erupt
 			);
 	}
 
-	void SimpleRenderSystem::RenderEntities(VkCommandBuffer commandBuffer, std::vector<Entity>& entities, const Camera& camera)
+	void SimpleRenderSystem::RenderEntities(FrameInfo& frameInfo, std::vector<Entity>& entities)
 	{
-		m_EruptPipeline->Bind(commandBuffer);
+		m_EruptPipeline->Bind(frameInfo.commandBuffer);
 
 		for (auto& entity : entities)
 		{
-			glm::mat4 viewProjection = camera.GetProjection() * camera.GetView();
+			glm::mat4 viewProjection = frameInfo.camera.GetProjection() * frameInfo.camera.GetView();
 
 			entity.m_Transform.rotation.y += 0.01f;
 
@@ -82,15 +82,15 @@ namespace Erupt
 			push.normalMatrix = entity.m_Transform.normalMatrix();
 
 			vkCmdPushConstants(
-				commandBuffer,
+				frameInfo.commandBuffer,
 				m_PipelineLayout,
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
 				0,
 				sizeof(SimplePushConstantData),
 				&push);
 
-			entity.m_Model->Bind(commandBuffer);
-			entity.m_Model->Draw(commandBuffer);
+			entity.m_Model->Bind(frameInfo.commandBuffer);
+			entity.m_Model->Draw(frameInfo.commandBuffer);
 		}
 	}
 }

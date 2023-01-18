@@ -104,6 +104,9 @@
     <ClInclude Include="headers\graphics\EruptBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="headers\graphics\EruptFrameInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="compile_shaders.bat">

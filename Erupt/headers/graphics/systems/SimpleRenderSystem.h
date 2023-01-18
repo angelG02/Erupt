@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/EruptPipeline.h"
+#include "graphics/EruptFrameInfo.h"
 
 #include "ECS/Entity.h"
 #include "core/Camera.h"
@@ -15,7 +16,7 @@ namespace Erupt
 
 		static void Init();
 		
-		void RenderEntities(VkCommandBuffer commandBuffer, std::vector<Entity>& entities, const Camera& camera);
+		void RenderEntities(FrameInfo& frameInfo, std::vector<Entity>& entities);
 
 	private:
 		void CreatePipelineLayout();
