@@ -8,7 +8,7 @@ namespace Erupt
 	struct SimplePushConstantData
 	{
 		glm::mat4 transform{ 1.f };
-		alignas(16) glm::vec3 color;
+		glm::mat4 normalMatrix{ 1.f };
 	};
 
 	SimpleRenderSystem::SimpleRenderSystem(EruptDevice& device, VkRenderPass renderPass) : m_EruptDevice(device)
@@ -74,9 +74,12 @@ namespace Erupt
 		{
 			glm::mat4 viewProjection = camera.GetProjection() * camera.GetView();
 
+			entity.m_Transform.rotation.y += 0.01f;
+
 			SimplePushConstantData push{};
-			push.color = entity.m_Color;
-			push.transform = viewProjection * entity.m_Transform.mat4();
+			auto modelMatrix = entity.m_Transform.mat4();
+			push.transform = viewProjection * modelMatrix;
+			push.normalMatrix = entity.m_Transform.normalMatrix();
 
 			vkCmdPushConstants(
 				commandBuffer,

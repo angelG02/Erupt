@@ -74,12 +74,12 @@ namespace Erupt
 
 	void Application::LoadEntities()
 	{
-		std::shared_ptr<Model> model = Model::CreateModelFromFile(m_EruptDevice, "models/smooth_vase.obj");
+		std::shared_ptr<Model> model = Model::CreateModelFromFile(m_EruptDevice, "models/flat_vase.obj");
 
 		auto entity = Entity::CreateEntity();
 		entity.m_Model = model;
-		entity.m_Transform.translation = { .0f, .0f, 2.5f };
-		entity.m_Transform.scale = glm::vec3(3.f);
+		entity.m_Transform.translation = { .0f, .5f, 2.5f };
+		entity.m_Transform.scale = { 3.f, 4.f, 3.f };
 
 		m_Entities.emplace_back(std::move(entity));
 	}
