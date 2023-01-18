@@ -4,6 +4,7 @@
 #include "core/Camera.h"
 #include "core/Input.h"
 
+#include "graphics/EruptBuffer.h"
 #include "graphics/systems/SimpleRenderSystem.h"
 
 #include <glm/gtc/constants.hpp>
@@ -11,6 +12,12 @@
 
 namespace Erupt
 {
+	struct GlobalUbo
+	{
+		glm::mat4 viewProjection{ 1.f };
+		glm::vec3 lightDirection = glm::normalize(glm::vec3{ 1.f, -3.f, -1.f });
+	};
+
 	Application::Application()
 	{
 		LoadEntities();
@@ -29,6 +36,17 @@ namespace Erupt
 
 	void Application::Run()
 	{
+		EruptBuffer globalUboBuffer
+		{
+			m_EruptDevice,
+			sizeof(GlobalUbo),
+			EruptSwapChain::MAX_FRAMES_IN_FLIGHT,
+			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+			m_EruptDevice.properties.limits.minUniformBufferOffsetAlignment
+		};
+		globalUboBuffer.Map();
+
 		SimpleRenderSystem simpleRenderSystem{ m_EruptDevice, m_EruptRenderer.GetSwapChainRenderPass() };
 
 		Camera camera{};
@@ -58,6 +76,16 @@ namespace Erupt
 
 			if (auto commandBuffer = m_EruptRenderer.BeginFrame())
 			{
+				int frameIndex = m_EruptRenderer.GetFrameIndex();
+
+				// Update
+				GlobalUbo ubo{};
+				ubo.viewProjection = camera.GetProjection() * camera.GetView();
+				globalUboBuffer.WriteToIndex(&ubo, frameIndex);
+				globalUboBuffer.FlushIndex(frameIndex);
+
+				// Render
+
 				// begin offscreen shadow pass
 				// render shadow casting objects	<--- Why render pass and frame are not combined
 				// end offscreen shadow pass
