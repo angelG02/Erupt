@@ -21,6 +21,7 @@ namespace Erupt
 		void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 
 		inline VkExtent2D GetExtent() { return { static_cast<uint32_t>(m_Width), static_cast<uint32_t>(m_Height) }; }
+		inline GLFWwindow* GetWindow() const { return m_Window; }
 
 		inline bool WasWindowResized() { return m_FramebufferResized; }
 		inline void ResetWindowResizedFlag() { m_FramebufferResized = false; }

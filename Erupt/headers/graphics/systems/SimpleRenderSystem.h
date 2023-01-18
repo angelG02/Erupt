@@ -3,6 +3,7 @@
 #include "graphics/EruptPipeline.h"
 
 #include "ECS/Entity.h"
+#include "core/Camera.h"
 
 namespace Erupt
 {
@@ -14,7 +15,7 @@ namespace Erupt
 
 		static void Init();
 		
-		void RenderEntities(VkCommandBuffer commandBuffer, std::vector<Entity>& entities);
+		void RenderEntities(VkCommandBuffer commandBuffer, std::vector<Entity>& entities, const Camera& camera);
 
 	private:
 		void CreatePipelineLayout();
