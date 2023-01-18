@@ -140,6 +140,7 @@
     <ClCompile Include="source\core\FileIO.cpp" />
     <ClCompile Include="source\core\Input.cpp" />
     <ClCompile Include="source\ECS\Entity.cpp" />
+    <ClCompile Include="source\graphics\EruptBuffer.cpp" />
     <ClCompile Include="source\graphics\EruptDevice.cpp" />
     <ClCompile Include="source\graphics\EruptPipeline.cpp" />
     <ClCompile Include="source\graphics\EruptRenderer.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="headers\core\Input.h" />
     <ClInclude Include="headers\ECS\Entity.h" />
     <ClInclude Include="headers\EruptUtils.h" />
+    <ClInclude Include="headers\graphics\EruptBuffer.h" />
     <ClInclude Include="headers\graphics\EruptDevice.h" />
     <ClInclude Include="headers\graphics\EruptPipeline.h" />
     <ClInclude Include="headers\graphics\EruptRenderer.h" />
