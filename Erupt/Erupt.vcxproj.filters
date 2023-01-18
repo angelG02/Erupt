@@ -92,6 +92,9 @@
     <ClInclude Include="headers\core\Input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="headers\EruptUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="compile_shaders.bat">
