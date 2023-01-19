@@ -68,7 +68,7 @@ namespace Erupt
 			);
 	}
 
-	void SimpleRenderSystem::RenderEntities(FrameInfo& frameInfo, std::vector<Entity>& entities)
+	void SimpleRenderSystem::RenderEntities(FrameInfo& frameInfo)
 	{
 		m_EruptPipeline->Bind(frameInfo.commandBuffer);
 
@@ -83,8 +83,13 @@ namespace Erupt
 			nullptr
 		);
 
-		for (auto& entity : entities)
+		for (auto& kv : frameInfo.entities)
 		{
+			auto& entity = kv.second;
+
+			// If the object does not have a model there is no need to render it
+			if (entity.m_Model == nullptr) continue;
+
 			if(entity.GetId() != 2)
 				entity.m_Transform.rotation.y += 0.01f;
 

@@ -30,7 +30,7 @@ namespace Erupt
 		EruptRenderer m_EruptRenderer{ m_EruptWindow, m_EruptDevice };
 
 		std::unique_ptr<EruptDescriptorPool> m_GlobalPool{};
-		std::vector<Entity>	m_Entities;
+		Entity::Map	m_Entities;
 	};
 
 } // namespace Erupt

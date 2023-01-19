@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <memory>
+#include <unordered_map>
 
 namespace Erupt
 {
@@ -26,6 +27,7 @@ namespace Erupt
 	{
 	public:
 		using id_t = unsigned int;
+		using Map = std::unordered_map<id_t, Entity>;
 
 		inline static Entity CreateEntity()
 		{

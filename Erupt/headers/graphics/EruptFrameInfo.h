@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/Camera.h"
+#include "ECS/Entity.h"
 
 // lib
 #include <vulkan/vulkan.h>
@@ -15,5 +16,7 @@ namespace Erupt
 		VkCommandBuffer commandBuffer;
 		Camera& camera;
 		VkDescriptorSet globalDescriptorSet;
+
+		Entity::Map& entities;
 	};
 }

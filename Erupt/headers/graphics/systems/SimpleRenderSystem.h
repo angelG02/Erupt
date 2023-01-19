@@ -16,7 +16,7 @@ namespace Erupt
 
 		static void Init();
 		
-		void RenderEntities(FrameInfo& frameInfo, std::vector<Entity>& entities);
+		void RenderEntities(FrameInfo& frameInfo);
 
 	private:
 		void CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout);

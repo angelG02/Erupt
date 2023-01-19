@@ -101,7 +101,7 @@ namespace Erupt
 			if (auto commandBuffer = m_EruptRenderer.BeginFrame())
 			{
 				int frameIndex = m_EruptRenderer.GetFrameIndex();
-				FrameInfo frameInfo{frameIndex, deltaTime, commandBuffer, camera, globalDescriptorSets[frameIndex]};
+				FrameInfo frameInfo{frameIndex, deltaTime, commandBuffer, camera, globalDescriptorSets[frameIndex], m_Entities};
 
 				// Update
 				GlobalUbo ubo{};
@@ -116,7 +116,7 @@ namespace Erupt
 				// end offscreen shadow pass
 
 				m_EruptRenderer.BeginSwapChainRenderPass(commandBuffer);
-				simpleRenderSystem.RenderEntities(frameInfo, m_Entities);
+				simpleRenderSystem.RenderEntities(frameInfo);
 				m_EruptRenderer.EndSwapChainRenderPass(commandBuffer);
 				m_EruptRenderer.EndFrame();
 			}
@@ -134,7 +134,7 @@ namespace Erupt
 		flatVaseEntity.m_Transform.translation = { .5f, .5f, 0.f };
 		flatVaseEntity.m_Transform.scale = { 3.f, 4.f, 3.f };
 
-		m_Entities.emplace_back(std::move(flatVaseEntity));
+		m_Entities.emplace(flatVaseEntity.GetId(), std::move(flatVaseEntity));
 
 		std::shared_ptr<Model> vase = Model::CreateModelFromFile(m_EruptDevice, "models/smooth_vase.obj");
 
@@ -143,7 +143,7 @@ namespace Erupt
 		smoothVaseEntity.m_Transform.translation = { -.5f, .5f, 0.f };
 		smoothVaseEntity.m_Transform.scale = { 3.f, 4.f, 3.f };
 
-		m_Entities.emplace_back(std::move(smoothVaseEntity));
+		m_Entities.emplace(smoothVaseEntity.GetId(), std::move(smoothVaseEntity));
 
 		std::shared_ptr<Model> quad = Model::CreateModelFromFile(m_EruptDevice, "models/quad.obj");
 
@@ -152,6 +152,6 @@ namespace Erupt
 		floor.m_Transform.translation = { 0.f, .5f, 0.f };
 		floor.m_Transform.scale = { 3.f, 1.f, 3.f };
 
-		m_Entities.emplace_back(std::move(floor));
+		m_Entities.emplace(floor.GetId(), std::move(floor));
 	}
 }
