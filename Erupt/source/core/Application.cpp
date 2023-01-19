@@ -6,6 +6,7 @@
 
 #include "graphics/EruptBuffer.h"
 #include "graphics/systems/SimpleRenderSystem.h"
+#include "graphics/systems/PointLightSystem.h"
 
 #include <glm/gtc/constants.hpp>
 #include <chrono>
@@ -14,7 +15,8 @@ namespace Erupt
 {
 	struct GlobalUbo
 	{
-		glm::mat4 viewProjection{ 1.f };
+		glm::mat4 projection{ 1.f };
+		glm::mat4 view{ 1.f };
 		
 		glm::vec4 ambientLightColor{ 1.f, 1.f, 1.f, .02f }; // w is intensity
 		glm::vec3 lightPosition{ -1.f };
@@ -70,7 +72,8 @@ namespace Erupt
 				.Build(globalDescriptorSets[i]);
 		}
 
-		SimpleRenderSystem simpleRenderSystem{ m_EruptDevice, m_EruptRenderer.GetSwapChainRenderPass(), globalSetLayout->GetDescriptorSetLayout()};
+		SimpleRenderSystem simpleRenderSystem{ m_EruptDevice, m_EruptRenderer.GetSwapChainRenderPass(), globalSetLayout->GetDescriptorSetLayout() };
+		PointLightSystem pointLightSystem{ m_EruptDevice, m_EruptRenderer.GetSwapChainRenderPass(), globalSetLayout->GetDescriptorSetLayout()};
 
 		Camera camera{};
 		camera.SetViewDirection(glm::vec3(0.f), glm::vec3(0.f, 0.f, 1.f));
@@ -105,7 +108,8 @@ namespace Erupt
 
 				// Update
 				GlobalUbo ubo{};
-				ubo.viewProjection = camera.GetProjection() * camera.GetView();
+				ubo.projection = camera.GetProjection();
+				ubo.view = camera.GetView();
 				uboBuffers[frameIndex]->WriteToBuffer(&ubo);
 				uboBuffers[frameIndex]->Flush();
 
@@ -117,6 +121,7 @@ namespace Erupt
 
 				m_EruptRenderer.BeginSwapChainRenderPass(commandBuffer);
 				simpleRenderSystem.RenderEntities(frameInfo);
+				pointLightSystem.Render(frameInfo);
 				m_EruptRenderer.EndSwapChainRenderPass(commandBuffer);
 				m_EruptRenderer.EndFrame();
 			}

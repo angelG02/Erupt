@@ -60,6 +60,9 @@
     <ClCompile Include="source\graphics\EruptDescriptors.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\graphics\systems\PointLightSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\graphics\EruptWindow.h">
@@ -113,6 +116,9 @@
     <ClInclude Include="headers\graphics\EruptDescriptors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="headers\graphics\systems\PointLightSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="compile_shaders.bat">
@@ -124,5 +130,7 @@
     <None Include="resources\shaders\simple_shader.vert">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="resources\shaders\point_light.vert" />
+    <None Include="resources\shaders\point_light.frag" />
   </ItemGroup>
 </Project>

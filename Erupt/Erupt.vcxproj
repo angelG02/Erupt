@@ -149,6 +149,7 @@
     <ClCompile Include="source\graphics\EruptWindow.cpp" />
     <ClCompile Include="source\core\Log.cpp" />
     <ClCompile Include="source\graphics\Model.cpp" />
+    <ClCompile Include="source\graphics\systems\PointLightSystem.cpp" />
     <ClCompile Include="source\graphics\systems\SimpleRenderSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -168,10 +169,13 @@
     <ClInclude Include="headers\graphics\EruptWindow.h" />
     <ClInclude Include="headers\core\Log.h" />
     <ClInclude Include="headers\graphics\Model.h" />
+    <ClInclude Include="headers\graphics\systems\PointLightSystem.h" />
     <ClInclude Include="headers\graphics\systems\SimpleRenderSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="compile_shaders.bat" />
+    <None Include="resources\shaders\point_light.frag" />
+    <None Include="resources\shaders\point_light.vert" />
     <None Include="resources\shaders\simple_shader.frag" />
     <None Include="resources\shaders\simple_shader.vert" />
   </ItemGroup>
