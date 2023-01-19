@@ -16,6 +16,7 @@ namespace Erupt
 
 		static void Init();
 
+		void Update(FrameInfo& frameInfo, GlobalUbo& ubo);
 		void Render(FrameInfo& frameInfo);
 
 	private:

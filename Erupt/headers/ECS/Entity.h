@@ -23,6 +23,11 @@ namespace Erupt
 		glm::mat3 normalMatrix();
 	};
 
+	struct PointLightComponent
+	{
+		float lightIntensity = 1.0f;
+	};
+
 	class Entity
 	{
 	public:
@@ -35,6 +40,8 @@ namespace Erupt
 			return Entity(currentId++);
 		}
 
+		static Entity MakePointLight(float intensity = 3.f, float radius = 0.1f, glm::vec3 color = glm::vec3(1.f));
+
 		Entity(const Entity&) = delete;
 		Entity& operator=(const Entity&) = delete;
 		Entity(Entity&&) = default;
@@ -46,9 +53,12 @@ namespace Erupt
 		inline Entity(id_t entityId) : m_Id(entityId) {}
 
 	public:
-		std::shared_ptr<Model> m_Model{};
 		glm::vec3 m_Color{};
 		TransformComponent m_Transform{};
+
+		// Optional pointer components
+		std::shared_ptr<Model> m_Model{};
+		std::unique_ptr<PointLightComponent> pointLight = nullptr;
 
 	private:
 		id_t m_Id;

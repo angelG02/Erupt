@@ -65,4 +65,15 @@ namespace Erupt
 			},
 		};
 	}
+
+	Entity Entity::MakePointLight(float intensity, float radius, glm::vec3 color)
+	{
+		Entity entity = CreateEntity();
+		entity.m_Color = color;
+		entity.m_Transform.scale.x = radius;
+		entity.pointLight = std::make_unique<PointLightComponent>();
+		entity.pointLight->lightIntensity = intensity;
+
+		return entity;
+	}
 }
