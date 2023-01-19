@@ -110,6 +110,9 @@ namespace Erupt
 		configInfo.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
 		configInfo.dynamicStateInfo.flags = 0;
 
+		configInfo.bindingDescriptions = Model::Vertex::GetBindingDescriptions();
+		configInfo.attributeDescriptions = Model::Vertex::GetAttributeDescriptions();
+
 	}
 
 	void EruptPipeline::CreateGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo& configInfo)
@@ -149,8 +152,8 @@ namespace Erupt
 		shaderStages[1].pNext = nullptr;
 		shaderStages[1].pSpecializationInfo = nullptr;
 
-		auto bindingDescriptions = Model::Vertex::GetBindingDescriptions();
-		auto attributeDescriptions = Model::Vertex::GetAttributeDescriptions();
+		auto& bindingDescriptions = configInfo.bindingDescriptions;
+		auto& attributeDescriptions = configInfo.attributeDescriptions;
 
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;

@@ -51,6 +51,8 @@ namespace Erupt
 
 		PipelineConfigInfo pipelineConfig{};
 		EruptPipeline::DefaultPipelineConfigInfo(pipelineConfig);
+		pipelineConfig.bindingDescriptions.clear();
+		pipelineConfig.attributeDescriptions.clear();
 		pipelineConfig.renderPass = renderPass;
 		pipelineConfig.pipelineLayout = m_PipelineLayout;
 
