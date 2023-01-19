@@ -7,13 +7,13 @@ namespace Erupt
 {
 	struct SimplePushConstantData
 	{
-		glm::mat4 transform{ 1.f };
+		glm::mat4 modelMatrix{ 1.f };
 		glm::mat4 normalMatrix{ 1.f };
 	};
 
-	SimpleRenderSystem::SimpleRenderSystem(EruptDevice& device, VkRenderPass renderPass) : m_EruptDevice(device)
+	SimpleRenderSystem::SimpleRenderSystem(EruptDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) : m_EruptDevice(device)
 	{
-		CreatePipelineLayout();
+		CreatePipelineLayout(globalSetLayout);
 		CreatePipeline(renderPass);
 	}
 
@@ -28,17 +28,19 @@ namespace Erupt
 		FileIO::Init();
 	}
 
-	void SimpleRenderSystem::CreatePipelineLayout()
+	void SimpleRenderSystem::CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout)
 	{
 		VkPushConstantRange pushConstantRange{};
 		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 		pushConstantRange.offset = 0;
 		pushConstantRange.size = sizeof(SimplePushConstantData);
 
+		std::vector<VkDescriptorSetLayout> descriptorSetLayouts{ globalSetLayout };
+
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = 0;
-		pipelineLayoutInfo.pSetLayouts = nullptr;
+		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
+		pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
 		pipelineLayoutInfo.pushConstantRangeCount = 1;
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
@@ -70,15 +72,23 @@ namespace Erupt
 	{
 		m_EruptPipeline->Bind(frameInfo.commandBuffer);
 
+		vkCmdBindDescriptorSets(
+			frameInfo.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			m_PipelineLayout,
+			0, 
+			1,
+			&frameInfo.globalDescriptorSet,
+			0, 
+			nullptr
+		);
+
 		for (auto& entity : entities)
 		{
-			glm::mat4 viewProjection = frameInfo.camera.GetProjection() * frameInfo.camera.GetView();
-
 			entity.m_Transform.rotation.y += 0.01f;
 
 			SimplePushConstantData push{};
-			auto modelMatrix = entity.m_Transform.mat4();
-			push.transform = viewProjection * modelMatrix;
+			push.modelMatrix = entity.m_Transform.mat4();
 			push.normalMatrix = entity.m_Transform.normalMatrix();
 
 			vkCmdPushConstants(

@@ -14,5 +14,6 @@ namespace Erupt
 		float deltaTime;
 		VkCommandBuffer commandBuffer;
 		Camera& camera;
+		VkDescriptorSet globalDescriptorSet;
 	};
 }

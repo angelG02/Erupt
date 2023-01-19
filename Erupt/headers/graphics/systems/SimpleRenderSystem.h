@@ -11,7 +11,7 @@ namespace Erupt
 	class SimpleRenderSystem
 	{
 	public:
-		SimpleRenderSystem(EruptDevice& device, VkRenderPass renderPass);
+		SimpleRenderSystem(EruptDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
 		~SimpleRenderSystem();
 
 		static void Init();
@@ -19,7 +19,7 @@ namespace Erupt
 		void RenderEntities(FrameInfo& frameInfo, std::vector<Entity>& entities);
 
 	private:
-		void CreatePipelineLayout();
+		void CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout);
 		void CreatePipeline(VkRenderPass renderPass);
 
 	private:

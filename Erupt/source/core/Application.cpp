@@ -20,6 +20,11 @@ namespace Erupt
 
 	Application::Application()
 	{
+		m_GlobalPool = EruptDescriptorPool::Builder(m_EruptDevice)
+			.SetMaxSets(EruptSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.AddPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, EruptSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.Build();
+
 		LoadEntities();
 	}
 
@@ -49,7 +54,20 @@ namespace Erupt
 			uboBuffers[i]->Map();
 		}
 
-		SimpleRenderSystem simpleRenderSystem{ m_EruptDevice, m_EruptRenderer.GetSwapChainRenderPass() };
+		auto globalSetLayout = EruptDescriptorSetLayout::Builder(m_EruptDevice)
+			.AddBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+			.Build();
+
+		std::vector<VkDescriptorSet> globalDescriptorSets(EruptSwapChain::MAX_FRAMES_IN_FLIGHT);
+		for (int i = 0; i < globalDescriptorSets.size(); i++)
+		{
+			auto bufferInfo = uboBuffers[i]->DescriptorInfo();
+			EruptDescriptorWriter(*globalSetLayout, *m_GlobalPool)
+				.WriteBuffer(0, &bufferInfo)
+				.Build(globalDescriptorSets[i]);
+		}
+
+		SimpleRenderSystem simpleRenderSystem{ m_EruptDevice, m_EruptRenderer.GetSwapChainRenderPass(), globalSetLayout->GetDescriptorSetLayout()};
 
 		Camera camera{};
 		camera.SetViewDirection(glm::vec3(0.f), glm::vec3(0.f, 0.f, 1.f));
@@ -79,7 +97,7 @@ namespace Erupt
 			if (auto commandBuffer = m_EruptRenderer.BeginFrame())
 			{
 				int frameIndex = m_EruptRenderer.GetFrameIndex();
-				FrameInfo frameInfo{frameIndex, deltaTime, commandBuffer, camera};
+				FrameInfo frameInfo{frameIndex, deltaTime, commandBuffer, camera, globalDescriptorSets[frameIndex]};
 
 				// Update
 				GlobalUbo ubo{};

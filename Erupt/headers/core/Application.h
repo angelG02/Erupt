@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/EruptRenderer.h"
+#include "graphics/EruptDescriptors.h"
 
 #include "ECS/Entity.h"
 
@@ -23,12 +24,13 @@ namespace Erupt
 		void LoadEntities();
 
 	private:
-		Window							m_EruptWindow{ WINDOW_WIDTH, WINDOW_HEIGHT, "Henlo Vulkan!" };
-		EruptDevice						m_EruptDevice{ m_EruptWindow };
+		Window m_EruptWindow{ WINDOW_WIDTH, WINDOW_HEIGHT, "Henlo Vulkan!" };
+		EruptDevice	m_EruptDevice{ m_EruptWindow };
+					 
+		EruptRenderer m_EruptRenderer{ m_EruptWindow, m_EruptDevice };
 
-		EruptRenderer					m_EruptRenderer{ m_EruptWindow, m_EruptDevice };
-
-		std::vector<Entity>				m_Entities;
+		std::unique_ptr<EruptDescriptorPool> m_GlobalPool{};
+		std::vector<Entity>	m_Entities;
 	};
 
 } // namespace Erupt
