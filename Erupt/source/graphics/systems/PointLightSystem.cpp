@@ -1,39 +1,40 @@
-#include "graphics/systems/SimpleRenderSystem.h"
+#include "graphics/systems/PointLightSystem.h"
 
 #include "core/FileIO.h"
 #include "core/Log.h"
 
 namespace Erupt
 {
-	struct SimplePushConstantData
+	struct PointLightPushConstants
 	{
-		glm::mat4 modelMatrix{ 1.f };
-		glm::mat4 normalMatrix{ 1.f };
+		glm::vec4 position{};
+		glm::vec4 color{};
+		float radius;
 	};
 
-	SimpleRenderSystem::SimpleRenderSystem(EruptDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) : m_EruptDevice(device)
+	PointLightSystem::PointLightSystem(EruptDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) : m_EruptDevice(device)
 	{
 		CreatePipelineLayout(globalSetLayout);
 		CreatePipeline(renderPass);
 	}
 
-	SimpleRenderSystem::~SimpleRenderSystem()
+	PointLightSystem::~PointLightSystem()
 	{
 		vkDestroyPipelineLayout(m_EruptDevice.Device(), m_PipelineLayout, nullptr);
 	}
 
-	void SimpleRenderSystem::Init()
+	void PointLightSystem::Init()
 	{
 		Log::Init();
 		FileIO::Init();
 	}
 
-	void SimpleRenderSystem::CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout)
+	void PointLightSystem::CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout)
 	{
 		VkPushConstantRange pushConstantRange{};
 		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 		pushConstantRange.offset = 0;
-		pushConstantRange.size = sizeof(SimplePushConstantData);
+		pushConstantRange.size = sizeof(PointLightPushConstants);
 
 		std::vector<VkDescriptorSetLayout> descriptorSetLayouts{ globalSetLayout };
 
@@ -51,24 +52,49 @@ namespace Erupt
 		}
 	}
 
-	void SimpleRenderSystem::CreatePipeline(VkRenderPass renderPass)
+	void PointLightSystem::CreatePipeline(VkRenderPass renderPass)
 	{
 		assert(m_PipelineLayout != nullptr && "Cannot create pipeline before pipeline layout!");
 
 		PipelineConfigInfo pipelineConfig{};
 		EruptPipeline::DefaultPipelineConfigInfo(pipelineConfig);
+		pipelineConfig.bindingDescriptions.clear();
+		pipelineConfig.attributeDescriptions.clear();
 		pipelineConfig.renderPass = renderPass;
 		pipelineConfig.pipelineLayout = m_PipelineLayout;
 
 		m_EruptPipeline = std::make_unique<EruptPipeline>(
 			m_EruptDevice,
-			"shaders/compiled/simple_shader.vert.spv",
-			"shaders/compiled/simple_shader.frag.spv",
+			"shaders/compiled/point_light.vert.spv",
+			"shaders/compiled/point_light.frag.spv",
 			pipelineConfig
 			);
 	}
 
-	void SimpleRenderSystem::RenderEntities(FrameInfo& frameInfo)
+	void PointLightSystem::Update(FrameInfo& frameInfo, GlobalUbo& ubo)
+	{
+		auto rotateLight = glm::rotate(glm::mat4(1.f), frameInfo.deltaTime, { 0.f, -1.f, 0.f });
+		int lightIndex = 0;
+		for (auto& kv : frameInfo.entities)
+		{
+			auto& entity = kv.second;
+			if (entity.pointLight == nullptr) continue;
+
+			assert(lightIndex < MAX_LIGHTS && "Point lights exceed maximum specified");
+
+			// update light position
+			entity.m_Transform.translation = glm::vec3(rotateLight * glm::vec4(entity.m_Transform.translation, 1.f));
+
+			// copy light to ubo
+			ubo.pointLights[lightIndex].position = glm::vec4(entity.m_Transform.translation, 1.f);
+			ubo.pointLights[lightIndex].color = glm::vec4(entity.m_Color, entity.pointLight->lightIntensity);
+
+			lightIndex += 1;
+		}
+		ubo.numLights = lightIndex;
+	}
+
+	void PointLightSystem::Render(FrameInfo& frameInfo)
 	{
 		m_EruptPipeline->Bind(frameInfo.commandBuffer);
 
@@ -76,37 +102,33 @@ namespace Erupt
 			frameInfo.commandBuffer,
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
 			m_PipelineLayout,
-			0, 
+			0,
 			1,
 			&frameInfo.globalDescriptorSet,
-			0, 
+			0,
 			nullptr
 		);
 
 		for (auto& kv : frameInfo.entities)
 		{
 			auto& entity = kv.second;
+			if (entity.pointLight == nullptr) continue;
 
-			// If the object does not have a model there is no need to render it
-			if (entity.m_Model == nullptr) continue;
-
-			if(entity.GetId() != 2)
-				entity.m_Transform.rotation.y += 0.01f;
-
-			SimplePushConstantData push{};
-			push.modelMatrix = entity.m_Transform.mat4();
-			push.normalMatrix = entity.m_Transform.normalMatrix();
+			PointLightPushConstants push{};
+			push.position = glm::vec4(entity.m_Transform.translation, 1.f);
+			push.color = glm::vec4(entity.m_Color, entity.pointLight->lightIntensity);
+			push.radius = entity.m_Transform.scale.x;
 
 			vkCmdPushConstants(
 				frameInfo.commandBuffer,
 				m_PipelineLayout,
 				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
 				0,
-				sizeof(SimplePushConstantData),
-				&push);
-
-			entity.m_Model->Bind(frameInfo.commandBuffer);
-			entity.m_Model->Draw(frameInfo.commandBuffer);
+				sizeof(PointLightPushConstants),
+				&push
+			);
+			vkCmdDraw(frameInfo.commandBuffer, 6, 1, 0, 0);
 		}
+
 	}
 }

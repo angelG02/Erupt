@@ -8,22 +8,23 @@
 
 namespace Erupt
 {
-	class SimpleRenderSystem
+	class PointLightSystem
 	{
 	public:
-		SimpleRenderSystem(EruptDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
-		~SimpleRenderSystem();
+		PointLightSystem(EruptDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
+		~PointLightSystem();
 
 		static void Init();
-		
-		void RenderEntities(FrameInfo& frameInfo);
+
+		void Update(FrameInfo& frameInfo, GlobalUbo& ubo);
+		void Render(FrameInfo& frameInfo);
 
 	private:
 		void CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout);
 		void CreatePipeline(VkRenderPass renderPass);
 
 	private:
-		EruptDevice&					m_EruptDevice;
+		EruptDevice& m_EruptDevice;
 
 		std::unique_ptr<EruptPipeline>	m_EruptPipeline;
 		VkPipelineLayout				m_PipelineLayout;

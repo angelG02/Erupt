@@ -40,14 +40,6 @@ namespace Erupt
 
 	Model::~Model()
 	{
-		vkDestroyBuffer(m_Device.Device(), m_VertexBuffer, nullptr);
-		vkFreeMemory(m_Device.Device(), m_VertexBufferMemory, nullptr);
-
-		if (m_IsIndexed)
-		{
-			vkDestroyBuffer(m_Device.Device(), m_IndexBuffer, nullptr);
-			vkFreeMemory(m_Device.Device(), m_IndexBufferMemory, nullptr);
-		}
 	}
 
 	std::unique_ptr<Model> Model::CreateModelFromFile(EruptDevice& device, const std::string& filepath)
@@ -62,14 +54,14 @@ namespace Erupt
 
 	void Model::Bind(VkCommandBuffer commandBuffer)
 	{
-		VkBuffer buffers[] = { m_VertexBuffer };
+		VkBuffer buffers[] = { m_VertexBuffer->GetBuffer()};
 		VkDeviceSize offsets[] = { 0 };
 
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
 
 		if (m_IsIndexed)
 		{
-			vkCmdBindIndexBuffer(commandBuffer, m_IndexBuffer, 0, VK_INDEX_TYPE_UINT32);
+			vkCmdBindIndexBuffer(commandBuffer, m_IndexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 		}
 	}
 
@@ -92,34 +84,30 @@ namespace Erupt
 
 		VkDeviceSize bufferSize = sizeof(vertices[0]) * m_VertexCount;
 
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingBufferMemory;
+		uint32_t vertexSize = sizeof(vertices[0]);
 
-		m_Device.CreateBuffer(
-			bufferSize,
+		EruptBuffer stagingBuffer
+		{
+			m_Device,
+			vertexSize,
+			m_VertexCount,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, // Makes the buffer accessible/writable form CPU (Host) and as soon as it's updated on the CPU the changes get flushed to the GPU as well
-			stagingBuffer,
-			stagingBufferMemory
-		);
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		};
 
-		void* data;
-		vkMapMemory(m_Device.Device(), stagingBufferMemory, 0, bufferSize, 0, &data);
-		memcpy(data, vertices.data(), static_cast<size_t>(bufferSize));
-		vkUnmapMemory(m_Device.Device(), stagingBufferMemory);
+		stagingBuffer.Map();
+		stagingBuffer.WriteToBuffer((void*)vertices.data());
 
-		m_Device.CreateBuffer(
-			bufferSize,
+		m_VertexBuffer = std::make_unique<EruptBuffer>
+		(
+			m_Device,
+			vertexSize,
+			m_VertexCount,
 			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, // Makes the buffer accessible form GPU!
-			m_VertexBuffer,
-			m_VertexBufferMemory
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 		);
 
-		m_Device.CopyBuffer(stagingBuffer, m_VertexBuffer, bufferSize);
-
-		vkDestroyBuffer(m_Device.Device(), stagingBuffer, nullptr);
-		vkFreeMemory(m_Device.Device(), stagingBufferMemory, nullptr);
+		m_Device.CopyBuffer(stagingBuffer.GetBuffer(), m_VertexBuffer->GetBuffer(), bufferSize);
 	}
 
 	void Model::CreateIndexBuffers(const std::vector<uint32_t>& indices)
@@ -133,35 +121,30 @@ namespace Erupt
 		}
 
 		VkDeviceSize bufferSize = sizeof(indices[0]) * m_IndexCount;
+		uint32_t indexSize = sizeof(indices[0]);
 
-		VkBuffer stagingBuffer;
-		VkDeviceMemory stagingBufferMemory;
-
-		m_Device.CreateBuffer(
-			bufferSize,
+		EruptBuffer stagingBuffer
+		{
+			m_Device,
+			indexSize,
+			m_IndexCount,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, // Makes the buffer accessible/writable form CPU (Host) and as soon as it's updated on the CPU the changes get flushed to the GPU as well
-			stagingBuffer,
-			stagingBufferMemory
-		);
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		};
 
-		void* data;
-		vkMapMemory(m_Device.Device(), stagingBufferMemory, 0, bufferSize, 0, &data);
-		memcpy(data, indices.data(), static_cast<size_t>(bufferSize));
-		vkUnmapMemory(m_Device.Device(), stagingBufferMemory);
-
-		m_Device.CreateBuffer(
-			bufferSize,
+		stagingBuffer.Map();
+		stagingBuffer.WriteToBuffer((void*)indices.data());
+		
+		m_IndexBuffer = std::make_unique<EruptBuffer>
+		(
+			m_Device,
+			indexSize,
+			m_IndexCount,
 			VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, // Makes the buffer accessible form GPU!!
-			m_IndexBuffer,
-			m_IndexBufferMemory
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 		);
 
-		m_Device.CopyBuffer(stagingBuffer, m_IndexBuffer, bufferSize);
-
-		vkDestroyBuffer(m_Device.Device(), stagingBuffer, nullptr);
-		vkFreeMemory(m_Device.Device(), stagingBufferMemory, nullptr);
+		m_Device.CopyBuffer(stagingBuffer.GetBuffer(), m_IndexBuffer->GetBuffer(), bufferSize);
 	}
 
 	std::vector<VkVertexInputBindingDescription> Model::Vertex::GetBindingDescriptions()
@@ -176,18 +159,16 @@ namespace Erupt
 
 	std::vector<VkVertexInputAttributeDescription> Model::Vertex::GetAttributeDescriptions()
 	{
-		std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
-		// Position Attribute
-		attributeDescriptions[0].binding = 0;
-		attributeDescriptions[0].location = 0;
-		attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[0].offset = offsetof(Vertex, position);
+		std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
 
+		// Position Attribute
+		attributeDescriptions.push_back({ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position) });
 		// Color attribute
-		attributeDescriptions[1].binding = 0;
-		attributeDescriptions[1].location = 1;
-		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-		attributeDescriptions[1].offset = offsetof(Vertex, color);
+		attributeDescriptions.push_back({ 1, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, color) });
+		// Normal attribute
+		attributeDescriptions.push_back({ 2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, normal) });
+		// Texture coordinate attribute
+		attributeDescriptions.push_back({ 3, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, uv) });
 
 		return attributeDescriptions;
 	}
@@ -227,20 +208,12 @@ namespace Erupt
 						attrib.vertices[3 * index.vertex_index + 2]
 					};
 
-					auto colorIndex = 3 * index.vertex_index + 2;
-					if (colorIndex < attrib.colors.size())
+					vertex.color =
 					{
-						vertex.color =
-						{
-							attrib.colors[colorIndex - 2],
-							attrib.colors[colorIndex - 1],
-							attrib.colors[colorIndex - 0],
-						};
-					}
-					else
-					{
-						vertex.color = { 1.f, 1.f, 1.f };
-					}
+						attrib.colors[3 * index.vertex_index + 0],
+						attrib.colors[3 * index.vertex_index + 1],
+						attrib.colors[3 * index.vertex_index + 2]
+					};
 				}
 
 				if (index.normal_index >= 0)
