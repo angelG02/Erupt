@@ -15,7 +15,10 @@ namespace Erupt
 	struct GlobalUbo
 	{
 		glm::mat4 viewProjection{ 1.f };
-		glm::vec3 lightDirection = glm::normalize(glm::vec3{ 1.f, -3.f, -1.f });
+		
+		glm::vec4 ambientLightColor{ 1.f, 1.f, 1.f, .02f }; // w is intensity
+		glm::vec3 lightPosition{ -1.f };
+		alignas(16) glm::vec4 lightColor{ 1.f }; // w is light intensity
 	};
 
 	Application::Application()
@@ -55,7 +58,7 @@ namespace Erupt
 		}
 
 		auto globalSetLayout = EruptDescriptorSetLayout::Builder(m_EruptDevice)
-			.AddBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+			.AddBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.Build();
 
 		std::vector<VkDescriptorSet> globalDescriptorSets(EruptSwapChain::MAX_FRAMES_IN_FLIGHT);
@@ -73,6 +76,7 @@ namespace Erupt
 		camera.SetViewDirection(glm::vec3(0.f), glm::vec3(0.f, 0.f, 1.f));
 
 		auto viewerEntity = Entity::CreateEntity();
+		viewerEntity.m_Transform.translation.z = -2.5;
 		Input cameraControler{};
 
 		auto currentTime = std::chrono::high_resolution_clock::now();
@@ -92,7 +96,7 @@ namespace Erupt
 			camera.SetViewYXZ(viewerEntity.m_Transform.translation, viewerEntity.m_Transform.rotation);
 			
 			float aspectRatio = m_EruptRenderer.GetAspectRatio();
-			camera.SetPerspectiveProjection(glm::radians(50.f), aspectRatio, 0.1f, 10.f);
+			camera.SetPerspectiveProjection(glm::radians(50.f), aspectRatio, 0.1f, 1000.f);
 
 			if (auto commandBuffer = m_EruptRenderer.BeginFrame())
 			{
@@ -123,13 +127,31 @@ namespace Erupt
 
 	void Application::LoadEntities()
 	{
-		std::shared_ptr<Model> model = Model::CreateModelFromFile(m_EruptDevice, "models/flat_vase.obj");
+		std::shared_ptr<Model> flatVase = Model::CreateModelFromFile(m_EruptDevice, "models/flat_vase.obj");
 
-		auto entity = Entity::CreateEntity();
-		entity.m_Model = model;
-		entity.m_Transform.translation = { .0f, .5f, 2.5f };
-		entity.m_Transform.scale = { 3.f, 4.f, 3.f };
+		auto flatVaseEntity = Entity::CreateEntity();
+		flatVaseEntity.m_Model = flatVase;
+		flatVaseEntity.m_Transform.translation = { .5f, .5f, 0.f };
+		flatVaseEntity.m_Transform.scale = { 3.f, 4.f, 3.f };
 
-		m_Entities.emplace_back(std::move(entity));
+		m_Entities.emplace_back(std::move(flatVaseEntity));
+
+		std::shared_ptr<Model> vase = Model::CreateModelFromFile(m_EruptDevice, "models/smooth_vase.obj");
+
+		auto smoothVaseEntity = Entity::CreateEntity();
+		smoothVaseEntity.m_Model = vase;
+		smoothVaseEntity.m_Transform.translation = { -.5f, .5f, 0.f };
+		smoothVaseEntity.m_Transform.scale = { 3.f, 4.f, 3.f };
+
+		m_Entities.emplace_back(std::move(smoothVaseEntity));
+
+		std::shared_ptr<Model> quad = Model::CreateModelFromFile(m_EruptDevice, "models/quad.obj");
+
+		auto floor = Entity::CreateEntity();
+		floor.m_Model = quad;
+		floor.m_Transform.translation = { 0.f, .5f, 0.f };
+		floor.m_Transform.scale = { 3.f, 1.f, 3.f };
+
+		m_Entities.emplace_back(std::move(floor));
 	}
 }

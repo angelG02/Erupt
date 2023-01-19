@@ -85,7 +85,8 @@ namespace Erupt
 
 		for (auto& entity : entities)
 		{
-			entity.m_Transform.rotation.y += 0.01f;
+			if(entity.GetId() != 2)
+				entity.m_Transform.rotation.y += 0.01f;
 
 			SimplePushConstantData push{};
 			push.modelMatrix = entity.m_Transform.mat4();
