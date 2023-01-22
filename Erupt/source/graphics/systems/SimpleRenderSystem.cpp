@@ -91,7 +91,7 @@ namespace Erupt
 			if (entity.m_Model == nullptr) continue;
 
 			if(entity.GetId() != 2)
-				entity.m_Transform.rotation.y += 0.01f;
+				entity.m_Transform.rotation.y += 1.f * frameInfo.deltaTime;
 
 			SimplePushConstantData push{};
 			push.modelMatrix = entity.m_Transform.mat4();
