@@ -32,6 +32,7 @@ namespace Erupt
 		inline bool IsFrameInProgress() const { return m_IsFrameStarted; }
 
 		inline VkRenderPass GetSwapChainRenderPass() const { return m_EruptSwapChain->GetRenderPass(); }
+		inline size_t GetSwapChainImageCount() const { return m_EruptSwapChain->ImageCount(); }
 		inline float GetAspectRatio() { return m_EruptSwapChain->ExtentAspectRatio(); }
 
 		inline VkCommandBuffer GetCurrentCommandBuffer() const

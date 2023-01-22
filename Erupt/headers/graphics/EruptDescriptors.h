@@ -73,6 +73,8 @@ namespace Erupt
 
         void ResetPool();
 
+        inline VkDescriptorPool GetPool() { return m_DescriptorPool; }
+
     private:
         EruptDevice& m_Device;
         VkDescriptorPool m_DescriptorPool;

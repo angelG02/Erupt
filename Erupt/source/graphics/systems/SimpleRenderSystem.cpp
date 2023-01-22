@@ -22,12 +22,6 @@ namespace Erupt
 		vkDestroyPipelineLayout(m_EruptDevice.Device(), m_PipelineLayout, nullptr);
 	}
 
-	void SimpleRenderSystem::Init()
-	{
-		Log::Init();
-		FileIO::Init();
-	}
-
 	void SimpleRenderSystem::CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout)
 	{
 		VkPushConstantRange pushConstantRange{};

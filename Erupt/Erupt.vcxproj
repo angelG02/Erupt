@@ -135,6 +135,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="external\imgui\imgui.cpp" />
+    <ClCompile Include="external\imgui\imgui_demo.cpp" />
+    <ClCompile Include="external\imgui\imgui_draw.cpp" />
+    <ClCompile Include="external\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="external\imgui\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="external\imgui\imgui_tables.cpp" />
+    <ClCompile Include="external\imgui\imgui_widgets.cpp" />
     <ClCompile Include="source\core\Application.cpp" />
     <ClCompile Include="source\core\Camera.cpp" />
     <ClCompile Include="source\core\FileIO.cpp" />
@@ -149,10 +156,19 @@
     <ClCompile Include="source\graphics\EruptWindow.cpp" />
     <ClCompile Include="source\core\Log.cpp" />
     <ClCompile Include="source\graphics\Model.cpp" />
+    <ClCompile Include="source\graphics\systems\EditorSystem.cpp" />
     <ClCompile Include="source\graphics\systems\PointLightSystem.cpp" />
     <ClCompile Include="source\graphics\systems\SimpleRenderSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="external\imgui\imconfig.h" />
+    <ClInclude Include="external\imgui\imgui.h" />
+    <ClInclude Include="external\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="external\imgui\imgui_impl_vulkan.h" />
+    <ClInclude Include="external\imgui\imgui_internal.h" />
+    <ClInclude Include="external\imgui\imstb_rectpack.h" />
+    <ClInclude Include="external\imgui\imstb_textedit.h" />
+    <ClInclude Include="external\imgui\imstb_truetype.h" />
     <ClInclude Include="headers\core\Application.h" />
     <ClInclude Include="headers\core\Camera.h" />
     <ClInclude Include="headers\core\FileIO.h" />
@@ -169,6 +185,7 @@
     <ClInclude Include="headers\graphics\EruptWindow.h" />
     <ClInclude Include="headers\core\Log.h" />
     <ClInclude Include="headers\graphics\Model.h" />
+    <ClInclude Include="headers\graphics\systems\EditorSystem.h" />
     <ClInclude Include="headers\graphics\systems\PointLightSystem.h" />
     <ClInclude Include="headers\graphics\systems\SimpleRenderSystem.h" />
   </ItemGroup>

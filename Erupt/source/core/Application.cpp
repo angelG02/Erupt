@@ -7,9 +7,12 @@
 #include "graphics/EruptBuffer.h"
 #include "graphics/systems/SimpleRenderSystem.h"
 #include "graphics/systems/PointLightSystem.h"
+#include "graphics/systems/EditorSystem.h"
 
 #include <glm/gtc/constants.hpp>
 #include <chrono>
+
+#include <imgui.h>
 
 namespace Erupt
 {
@@ -63,7 +66,8 @@ namespace Erupt
 		}
 
 		SimpleRenderSystem simpleRenderSystem{ m_EruptDevice, m_EruptRenderer.GetSwapChainRenderPass(), globalSetLayout->GetDescriptorSetLayout() };
-		PointLightSystem pointLightSystem{ m_EruptDevice, m_EruptRenderer.GetSwapChainRenderPass(), globalSetLayout->GetDescriptorSetLayout()};
+		PointLightSystem pointLightSystem{ m_EruptDevice, m_EruptRenderer.GetSwapChainRenderPass(), globalSetLayout->GetDescriptorSetLayout() };
+		EditorSystem editor{ m_EruptDevice, m_EruptWindow, m_EruptRenderer.GetSwapChainRenderPass(), m_EruptRenderer.GetSwapChainImageCount() };
 
 		Camera camera{};
 		camera.SetViewDirection(glm::vec3(0.f), glm::vec3(0.f, 0.f, 1.f));
@@ -115,6 +119,7 @@ namespace Erupt
 				m_EruptRenderer.BeginSwapChainRenderPass(commandBuffer);
 				simpleRenderSystem.RenderEntities(frameInfo);
 				pointLightSystem.Render(frameInfo);
+				editor.Render(frameInfo);
 				m_EruptRenderer.EndSwapChainRenderPass(commandBuffer);
 				m_EruptRenderer.EndFrame();
 			}

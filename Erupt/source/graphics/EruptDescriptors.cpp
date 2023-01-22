@@ -30,10 +30,10 @@ namespace Erupt
     // *************** Descriptor Set Layout *********************
 
     EruptDescriptorSetLayout::EruptDescriptorSetLayout(EruptDevice& device, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings)
-        : m_Device{device}, m_Bindings{bindings}
+        : m_Device{device}, m_Bindings{bindings}, m_DescriptorSetLayout{nullptr}
     {
         std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings{};
-        for (auto kv : m_Bindings)
+        for (const auto& kv : m_Bindings)
         {
             setLayoutBindings.push_back(kv.second);
         }
@@ -200,6 +200,6 @@ namespace Erupt
         {
             write.dstSet = set;
         }
-        vkUpdateDescriptorSets(m_Pool.m_Device.Device(), m_Writes.size(), m_Writes.data(), 0, nullptr);
+        vkUpdateDescriptorSets(m_Pool.m_Device.Device(), static_cast<uint32_t>(m_Writes.size()), m_Writes.data(), 0, nullptr);
     }
 }

@@ -45,15 +45,17 @@ namespace Erupt {
 		EruptDevice(EruptDevice&&) = delete;
 		EruptDevice& operator=(EruptDevice&&) = delete;
 
-		VkCommandPool GetCommandPool() { return m_CommandPool; }
-		VkDevice Device() { return m_Device; }
-		VkSurfaceKHR Surface() { return m_Surface; }
-		VkQueue GraphicsQueue() { return m_GraphicsQueue; }
-		VkQueue PresentQueue() { return m_PresentQueue; }
+		inline VkCommandPool GetCommandPool() { return m_CommandPool; }
+		inline VkInstance GetInstance() { return m_Instance; }
+		inline VkDevice Device() { return m_Device; }
+		inline VkPhysicalDevice PhysicalDevice() { return m_PhysicalDevice; }
+		inline VkSurfaceKHR Surface() { return m_Surface; }
+		inline VkQueue GraphicsQueue() { return m_GraphicsQueue; }
+		inline VkQueue PresentQueue() { return m_PresentQueue; }
 
-		SwapChainSupportDetails GetSwapChainSupport() { return QuerySwapChainSupport(m_PhysicalDevice); }
+		inline SwapChainSupportDetails GetSwapChainSupport() { return QuerySwapChainSupport(m_PhysicalDevice); }
 		uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
-		QueueFamilyIndices FindPhysicalQueueFamilies() { return FindQueueFamilies(m_PhysicalDevice); }
+		inline QueueFamilyIndices FindPhysicalQueueFamilies() { return FindQueueFamilies(m_PhysicalDevice); }
 		VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
 		// Buffer Helper Functions

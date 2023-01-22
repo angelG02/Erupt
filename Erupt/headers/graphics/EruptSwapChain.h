@@ -27,14 +27,14 @@ namespace Erupt
 		EruptSwapChain(const EruptSwapChain&) = delete;
 		EruptSwapChain& operator=(const EruptSwapChain&) = delete;
 
-		VkFramebuffer GetFrameBuffer(int index) { return m_SwapChainFramebuffers[index]; }
-		VkRenderPass GetRenderPass() { return m_RenderPass; }
-		VkImageView GetImageView(int index) { return m_SwapChainImageViews[index]; }
-		size_t ImageCount() { return m_SwapChainImages.size(); }
-		VkFormat GetSwapChainImageFormat() { return m_SwapChainImageFormat; }
-		VkExtent2D GetSwapChainExtent() { return m_SwapChainExtent; }
-		uint32_t Width() { return m_SwapChainExtent.width; }
-		uint32_t Height() { return m_SwapChainExtent.height; }
+		inline VkFramebuffer GetFrameBuffer(int index) { return m_SwapChainFramebuffers[index]; }
+		inline VkRenderPass GetRenderPass() { return m_RenderPass; }
+		inline VkImageView GetImageView(int index) { return m_SwapChainImageViews[index]; }
+		inline size_t ImageCount() { return m_SwapChainImages.size(); }
+		inline VkFormat GetSwapChainImageFormat() { return m_SwapChainImageFormat; }
+		inline VkExtent2D GetSwapChainExtent() { return m_SwapChainExtent; }
+		inline uint32_t Width() { return m_SwapChainExtent.width; }
+		inline uint32_t Height() { return m_SwapChainExtent.height; }
 
 		float ExtentAspectRatio() 
 		{

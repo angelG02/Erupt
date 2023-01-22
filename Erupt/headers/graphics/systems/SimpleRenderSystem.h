@@ -14,8 +14,6 @@ namespace Erupt
 		SimpleRenderSystem(EruptDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
 		~SimpleRenderSystem();
 
-		static void Init();
-		
 		void RenderEntities(FrameInfo& frameInfo);
 
 	private:
